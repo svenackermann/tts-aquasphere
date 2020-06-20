@@ -8,6 +8,19 @@ local function setup(colors)
     Turns.order = colors
     Turns.turn_color = colors[1]
     Turns.enable = true
+  else
+    showNextRoundButton()
+  end
+end
+
+-- global
+function onLoad()
+  local currentRound = getCurrentRound()
+  if currentRound == 0 then
+    showStartButton()
+  elseif currentRound < 4 and headquarters.roundEndReached() then
+    --TODO single player always needs the button
+    showNextRoundButton()
   end
 end
 
@@ -33,8 +46,7 @@ function onPlayerTurnEnd()
       for j, color in ipairs(order) do
         if endRoundPlayer == color then
           table.remove(order, j)
-          local theMsg = msg.playerEndRound:format(msg.getPlayerName(color))
-          broadcastToAll(theMsg, Color.fromString(color))
+          msg.broadcastPlayerRoundEnd(color)
         end
       end
     end
@@ -43,6 +55,5 @@ function onPlayerTurnEnd()
 end
 
 turns = {
-  pause = pause,
   setup = setup
 }

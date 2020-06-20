@@ -11,7 +11,7 @@ msg = {
     Yellow = 'Gelb'
   },
   atLeast2Players = 'Geht nur bei mindestens zwei anwesenden Spielern',
-  playerOrder = 'Ausgeloste Spielerreihenfolge:',
+  startPlayer = 'Ausgeloster Startspieler: %s',
   intermediateValuation = 'Zeit für die Zwischenwertung',
   playerEndRound = 'Spieler %s hat die Runde beendet.'
 }
@@ -25,13 +25,13 @@ local function getPlayerName(color)
   end
 end
 
-local function showPlayerOrder(colors)
-  for i = #colors, 1, -1 do
-    local color = colors[i]
-    broadcastToAll(getPlayerName(color), Color.fromString(color))
-  end
-  broadcastToAll(msg.playerOrder, Color.Green)
+local function broadcastStartPlayer(color)
+  broadcastToAll(msg.startPlayer:format(getPlayerName(color)), Color.fromString(color))
 end
 
-msg.showPlayerOrder = showPlayerOrder
-msg.getPlayerName = getPlayerName
+local function broadcastPlayerRoundEnd(color)
+  broadcastToAll(msg.playerEndRound:format(getPlayerName(color)), Color.fromString(color))
+end
+
+msg.broadcastStartPlayer = broadcastStartPlayer
+msg.broadcastPlayerRoundEnd = broadcastPlayerRoundEnd

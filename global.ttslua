@@ -5,17 +5,6 @@
 #include <board>
 #include <turns>
 
-function onLoad()
-  local currentRound = getCurrentRound()
-  if currentRound == 0 then
-    showStartButton()
-    turns.pause()
-  elseif currentRound < 4 and headquarters.roundEndReached() then
-    --TODO will not work for single player
-    showNextRoundButton()
-  end
-end
-
 setup3PlayersCard_GUID = 'a8734f'
 function showStartButton()
   local card = getObjectFromGUID(setup3PlayersCard_GUID)
@@ -100,11 +89,8 @@ function setupGame(thePlayers)
 
   local colors = players.setup(thePlayers)
   turns.setup(colors)
-  if #getSeatedPlayers() < 2 then
-    showNextRoundButton()
-  end
   headquarters.setup(colors)
-  msg.showPlayerOrder(colors)
+  msg.broadcastStartPlayer(colors[1])
 end
 
 function nextRound()
