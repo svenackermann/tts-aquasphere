@@ -1,0 +1,212 @@
+local programCardsBag_GUID = 'd05ff3'
+local nextProgramCardZone_GUID = '38a0c6'
+
+local programTiles_GUIDs = {
+  lab = '030cb4',
+  time = '426956',
+  crystal = 'eebb92',
+  octopode = '715fc2',
+  submarine = '321819',
+  research = 'f8d224',
+  bot = '9ecb7e',
+}
+
+local programPositions = {
+  {-28.62, 1.16, 3.17},
+  {-37.44, 1.16, 3.19},
+  {-27.57, 1.16, 0.02},
+  {-38.45, 1.16, -0.01},
+  {-29.26, 1.16, -3.89},
+  {-33.00, 1.16, -5.39},
+  {-36.75, 1.16, -3.86}
+}
+
+local programCardSetups = {
+  {
+    {'time', 'submarine', 'bot', 'lab', 'research', 'crystal', 'octopode'},
+    {'research', 'octopode', 'bot', 'lab', 'submarine', 'crystal', 'time'}
+  },
+  {
+    {'research', 'lab', 'octopode', 'time', 'submarine', 'bot', 'crystal'},
+    {'research', 'submarine', 'lab', 'crystal', 'bot', 'octopode', 'time'}
+  },
+  {
+    {'research', 'bot', 'submarine', 'octopode', 'lab', 'time', 'crystal'},
+    {'research', 'bot', 'submarine', 'octopode', 'lab', 'time', 'crystal'}
+  },
+  {
+    {'crystal', 'bot', 'submarine', 'research', 'lab', 'octopode', 'time'},
+    {'lab', 'time', 'submarine', 'research', 'octopode', 'bot', 'crystal'}
+  },
+  {
+    {'lab', 'crystal', 'time', 'bot', 'submarine', 'research', 'octopode'},
+    {'crystal', 'bot', 'research', 'time', 'submarine', 'lab', 'octopode'}
+  },
+  {
+    {'time', 'octopode', 'crystal', 'research', 'lab', 'submarine', 'bot'},
+    {'submarine', 'octopode', 'time', 'crystal', 'lab', 'research', 'bot'}
+  },
+  {
+    {'submarine', 'time', 'octopode', 'bot', 'research', 'lab', 'crystal'},
+    {'crystal', 'octopode', 'lab', 'submarine', 'research', 'time', 'bot'}
+  }
+}
+
+local engineerEndRoundZones_GUIDs = {
+  'b5dbde',
+  'ea25be',
+  '1e0f44',
+  '4edc7d'
+}
+
+local orderBotZones_GUIDs = {
+  'c48b5b',
+  '5c5b58',
+  'ff677c',
+  '8cd6a0'
+}
+
+local function getActivePlayers()
+  local result = {}
+  for i, zone_GUID in ipairs(orderBotZones_GUIDs) do
+    local orderBots = gmtools.getObjectsFromZone(zone_GUID, {type = 'orderBot'})
+    if #orderBots > 0 then
+      local info = gmtools.parse(orderBots[1])
+      table.insert(result, info.color)
+    end
+  end
+  return result
+end
+
+local function getEndRoundPlayers()
+  local players = {}
+  for i, zone_GUID in ipairs(engineerEndRoundZones_GUIDs) do
+    local engineers = gmtools.getObjectsFromZone(zone_GUID, {type = 'engineer'})
+    if #engineers > 0 then
+      table.insert(players, gmtools.parse(engineers[1]).color)
+    end
+  end
+  return players
+end
+
+local function roundEndReached()
+  local activePlayers = getActivePlayers()
+  local endRoundPlayers = getEndRoundPlayers()
+  return #activePlayers == #endRoundPlayers
+end
+
+local function positionPlayerBotAndEngineer(player, pos)
+  local engineer = getObjectFromGUID(player.engineer_GUID)
+  engineer.setPositionSmooth({-30.1 - 1.1 * pos, 1.83, 6.4}, false)
+  local zonePos = getObjectFromGUID(orderBotZones_GUIDs[pos]).getPosition()
+  zonePos.y = 1.6
+  local orderBot = getObjectFromGUID(player.orderBot_GUID)
+  orderBot.setLock(true)
+  orderBot.setPositionSmooth(zonePos, false)
+  return engineer
+end
+
+local function dealProgramCard(callback)
+  local pos = getObjectFromGUID(nextProgramCardZone_GUID).getPosition()
+  getObjectFromGUID(programCardsBag_GUID).takeObject({
+    position = pos,
+    rotation = {0, 0, math.random(0, 1) * 180},
+    callback_function = callback
+  })
+end
+
+local function applyProgramCard(callback)
+  local cards = gmtools.getObjectsFromZone(nextProgramCardZone_GUID, {type = 'programCard'})
+  local card = cards[1]
+  local rotZ = card.getRotation().z
+  card.setPositionSmooth({-50, 1.1, -3}, false)
+  card.setRotationSmooth({0, 90, rotZ}, false)
+  local cardNo = gmtools.parse(card).no
+  local frontOrBagIndex = 1
+  if rotZ > 90 then
+    frontOrBagIndex = 2
+  end
+  local cardSetup = programCardSetups[cardNo][frontOrBagIndex]
+  for i, programPosition in ipairs(programPositions) do
+    local actionType = cardSetup[i]
+    local programTile = getObjectFromGUID(programTiles_GUIDs[actionType])
+    programTile.setPositionSmooth(programPosition, false)
+    programTile.setLock(true)
+  end
+  if callback ~= nil then
+    local cardMoved = function() return not card.isSmoothMoving() end
+    Wait.condition(callback, cardMoved)
+  end
+end
+
+local function setup(colors)
+  getObjectFromGUID(programCardsBag_GUID).shuffle()
+  dealProgramCard(function() applyProgramCard(dealProgramCard) end)
+  for i, color in ipairs(colors) do
+    local player = players[color]
+    positionPlayerBotAndEngineer(player, i)
+    getObjectFromGUID(player.countMarker_GUID).setPositionSmooth({-26.85, 0.89 + i, 3.39}, false)
+    getObjectFromGUID(player.pointsMarker_GUID).setPositionSmooth({-24.52, 0.89 + i, 2.10}, false)
+  end
+end
+
+local function nextRound(round)
+  local dealNextProgramCard
+  if round < 4 then
+    dealNextProgramCard = dealProgramCard
+  end
+  applyProgramCard(dealNextProgramCard)
+
+  local endRoundPlayers = getEndRoundPlayers()
+  local lastEngineer
+  for i, endRoundPlayer in ipairs(endRoundPlayers) do
+    local player = players[endRoundPlayer]
+    lastEngineer = positionPlayerBotAndEngineer(player, i)
+  end
+  if #getSeatedPlayers() > 1 then
+    local enableTurns = function()
+      Turns.order = endRoundPlayers
+      Turns.turn_color = endRoundPlayers[1]
+      Turns.enable = true
+    end
+    Wait.condition(enableTurns, function() return not lastEngineer.isSmoothMoving() end, 3, enableTurns)
+  end
+end
+
+-- global
+function onPlayerTurnEnd()
+  local currentRound = getCurrentRound()
+  if currentRound == 0 then
+    -- not set up yet
+    return
+  end
+  local order = Turns.order
+  local endRoundPlayers = getEndRoundPlayers()
+
+  local noPlayers = #getActivePlayers()
+  if noPlayers == #endRoundPlayers then
+    Turns.enable = false
+    if currentRound < 4 then
+      showNextRoundButton()
+    end
+    broadcastToAll(msg.intermediateValuation, Color.Green)
+  elseif #endRoundPlayers + #order > noPlayers then
+    for i, endRoundPlayer in ipairs(endRoundPlayers) do
+      for j, color in ipairs(order) do
+        if endRoundPlayer == color then
+          table.remove(order, j)
+          local theMsg = msg.playerEndRound:format(msg.getPlayerName(color))
+          broadcastToAll(theMsg, Color.fromString(color))
+        end
+      end
+    end
+    Turns.order = order
+  end
+end
+
+headquarters = {
+  setup = setup,
+  getActivePlayers = getActivePlayers,
+  roundEndReached = roundEndReached,
+  nextRound = nextRound
+}

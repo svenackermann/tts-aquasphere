@@ -1,0 +1,133 @@
+#include <messages>
+#include <utils/gmNotesTools>
+#include <players>
+#include <headquarters>
+#include <board>
+
+function onLoad()
+  local currentRound = getCurrentRound()
+  if currentRound == 0 then
+    showStartButton()
+    Turns.enable = false
+  elseif currentRound < 4 and headquarters.roundEndReached() then
+    showNextRoundButton()
+  end
+end
+
+setup3PlayersCard_GUID = 'a8734f'
+function showStartButton()
+  local card = getObjectFromGUID(setup3PlayersCard_GUID)
+  card.clearButtons()
+  card.createButton({
+    click_function = 'setupGameSeatedPlayers',
+    label          = msg.btn.setupGameSeatedPlayers,
+    position       = {0, 2, -3},
+    height         = 700,
+    width          = 3100,
+    font_size      = 300
+  })
+  card.createButton({
+    click_function = 'setupGame2Players',
+    label          = msg.btn.start,
+    position       = {-2.3, 2, 2.5},
+    height         = 500,
+    width          = 1000,
+    font_size      = 300
+  })
+  card.createButton({
+    click_function = 'setupGame3Players',
+    label          = msg.btn.start,
+    position       = {0, 2, 2.5},
+    height         = 500,
+    width          = 1000,
+    font_size      = 300
+  })
+  card.createButton({
+    click_function = 'setupGame4Players',
+    label          = msg.btn.start,
+    position       = {2.3, 2, 2.5},
+    height         = 500,
+    width          = 1000,
+    font_size      = 300
+  })
+end
+
+function showNextRoundButton()
+  local card = getObjectFromGUID(setup3PlayersCard_GUID)
+  card.clearButtons()
+  card.createButton({
+    click_function = 'nextRound',
+    label          = msg.btn.nextRound,
+    position       = {0, 2, -3},
+    height         = 700,
+    width          = 1500,
+    font_size      = 300
+  })
+end
+
+function hideButtons()
+  local card = getObjectFromGUID(setup3PlayersCard_GUID)
+  card.clearButtons()
+end
+
+function setupGame2Players()
+  setupGame({'Yellow', 'Red'})
+end
+
+function setupGame3Players()
+  setupGame({'Yellow', 'Red', 'White'})
+end
+
+function setupGame4Players()
+  setupGame({'Yellow', 'Red', 'White', 'Blue'})
+end
+
+function setupGameSeatedPlayers(obj, color)
+  local seatedPlayers = getSeatedPlayers()
+  if #seatedPlayers < 2 then
+    broadcastToColor(msg.atLeast2Players, color, {0.856, 0.1, 0.094})
+  else
+    setupGame(seatedPlayers)
+  end
+end
+
+function setupGame(thePlayers)
+  hideButtons()
+  math.randomseed(os.time())
+  board.setup(#thePlayers)
+
+  local colors = players.setup(thePlayers)
+  if #getSeatedPlayers() > 1 then
+    Turns.type = 2
+    Turns.order = colors
+    Turns.turn_color = colors[1]
+    Turns.enable = true
+  else
+    showNextRoundButton()
+  end
+  headquarters.setup(colors)
+  msg.showPlayerOrder(colors)
+end
+
+function nextRound()
+  local currentRound = getCurrentRound()
+  if currentRound >= 3 or #getSeatedPlayers() > 1 then
+    hideButtons()
+  end
+  if currentRound >= 4 then
+    return
+  end
+  board.nextRound()
+  headquarters.nextRound(currentRound + 1)
+
+  -- TODO clean board
+end
+
+function getCurrentRound()
+  local centerTiles = board.getPlacedCenterTiles()
+  if #centerTiles == 0 then
+    return 0
+  else
+    return 5 - #centerTiles
+  end
+end

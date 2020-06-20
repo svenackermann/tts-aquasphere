@@ -1,0 +1,124 @@
+local boardSegment_GUIDs = {
+  A = 'ba4a26',
+  B = '88ac24',
+  C = '5f06a8',
+  D = '8d3c6b',
+  E = 'f0daa3',
+  F = '56bf39'
+}
+
+local boardSegmentPositions = {
+  {0.04, 1.06, 9.74},
+  {8.60, 1.06, 4.74},
+  {8.60, 1.06, -5.14},
+  {-0.03, 1.06, -10.08},
+  {-8.57, 1.06, -5.15},
+  {-8.51, 1.06, 4.74}
+}
+
+local centerTilesBag_GUID = '478ccc'
+local centerTilesScriptingZone_GUID = '4b43f2'
+local labExtensionsBag_GUID = '38554f'
+local researchCardsStack_GUID = 'b9d782'
+
+local researchCardPositions = {
+  {3.40, 2, 17.62},
+  {17.11, 2, 5.76},
+  {13.74, 2, -11.95},
+  {-3.48, 2, -17.93},
+  {-17.15, 2, -6.24},
+  {-13.69, 2, 11.54}
+}
+
+local labExtensionsPositions = {
+  {-3.10, 2, 17.41},
+  {13.60, 2, 11.28},
+  {16.77, 2, -6.20},
+  {3.10, 2, -17.63},
+  {-13.55, 2, -11.65},
+  {-16.67, 2, 5.81}
+}
+
+local function shuffleBoardSegment_GUIDs()
+  local shuffled = {}
+  for k, v in pairs(boardSegment_GUIDs) do
+  	local pos = math.random(1, #shuffled + 1)
+  	table.insert(shuffled, pos, v)
+  end
+  return shuffled
+end
+
+local function setupCenterTiles(noPlayers)
+  for i = 1, 4 do
+    local rotY = (math.random(6) - 1) * 60
+    getObjectFromGUID(centerTilesBag_GUID).takeObject({
+      position          = {0.05, 0.76 + 0.2 * i, -0.19},
+      rotation          = {0, rotY, 0},
+      -- items in bag are indexed in reverse order, so first item has index 11, last has 0
+      -- and of course, index decreases on each takeObject
+      index             = 12 - i - (noPlayers - 2) * 4
+    }).setLock(true)
+  end
+end
+
+local function dealResearchCards()
+  local researchCardsStack = getObjectFromGUID(researchCardsStack_GUID)
+  for i, researchCardPosition in ipairs(researchCardPositions) do
+    researchCardsStack.takeObject({
+      position = researchCardPosition,
+      rotation = {0, i * 60 + 233, 0}
+    })
+  end
+end
+
+local function dealLabExtensions()
+  local labExtensionsBag = getObjectFromGUID(labExtensionsBag_GUID)
+  for i, labExtensionsPosition in ipairs(labExtensionsPositions) do
+    labExtensionsBag.takeObject({
+      position = labExtensionsPosition,
+      rotation = {0, i * 60 + 4, 0}
+    })
+  end
+end
+
+local function getPlacedCenterTiles()
+  return gmtools.getObjectsFromZone(centerTilesScriptingZone_GUID, {type = 'centerTile'})
+end
+
+local function discardTopCenterTile()
+  local centerTiles = getPlacedCenterTiles()
+  local topCenterTile = centerTiles[1]
+  for i = 2, #centerTiles do
+    if topCenterTile.getPosition().y < centerTiles[i].getPosition().y then
+      topCenterTile = centerTiles[i]
+    end
+  end
+  getObjectFromGUID(centerTilesBag_GUID).putObject(topCenterTile)
+end
+
+local function setup(noPlayers)
+  local segments = shuffleBoardSegment_GUIDs()
+  for i, segment_GUID in ipairs(segments) do
+    local segment = getObjectFromGUID(segment_GUID)
+    segment.setPositionSmooth(boardSegmentPositions[i], false)
+    segment.setRotation({0.00, 60 * (i - 1), 0.00})
+  end
+
+  getObjectFromGUID(labExtensionsBag_GUID).shuffle()
+  getObjectFromGUID(researchCardsStack_GUID).shuffle()
+  dealResearchCards()
+  dealLabExtensions()
+  setupCenterTiles(noPlayers)
+end
+
+local function nextRound()
+  discardTopCenterTile()
+  dealResearchCards()
+  dealLabExtensions()
+end
+
+board = {
+  setup = setup,
+  nextRound = nextRound,
+  getPlacedCenterTiles = getPlacedCenterTiles
+}

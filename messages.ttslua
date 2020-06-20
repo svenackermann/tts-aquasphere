@@ -1,0 +1,37 @@
+msg = {
+  btn = {
+    setupGameSeatedPlayers = 'Start mit\nanwesenden Spielern',
+    start = 'Start',
+    nextRound = 'nächste\nRunde'
+  },
+  color = {
+    Red = 'Rot',
+    White = 'Weiß',
+    Blue = 'Blau',
+    Yellow = 'Gelb'
+  },
+  atLeast2Players = 'Geht nur bei mindestens zwei anwesenden Spielern',
+  playerOrder = 'Ausgeloste Spielerreihenfolge:',
+  intermediateValuation = 'Zeit für die Zwischenwertung',
+  playerEndRound = 'Spieler %s hat die Runde beendet.'
+}
+
+local function getPlayerName(color)
+  local player = Player[color]
+  if player.seated then
+    return player.steam_name
+  else
+    return msg.color[color]
+  end
+end
+
+local function showPlayerOrder(colors)
+  for i = #colors, 1, -1 do
+    local color = colors[i]
+    broadcastToAll(getPlayerName(color), Color.fromString(color))
+  end
+  broadcastToAll(msg.playerOrder, Color.Green)
+end
+
+msg.showPlayerOrder = showPlayerOrder
+msg.getPlayerName = getPlayerName

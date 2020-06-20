@@ -1,0 +1,107 @@
+players = {
+  Red = {
+    baseLabPos = {21.97, 1.06, 18.95},
+    rotY = 0,
+    scientist_GUID = 'c3f106',
+    initBot_GUID = '7093d9',
+    labBotPos = {42.64, 1.49, 16.26},
+    engineer_GUID = '6c48a0',
+    orderBot_GUID = '93cf49',
+    countMarker_GUID = 'f362b3',
+    pointsMarker_GUID = 'c2e284'
+  },
+  White = {
+    baseLabPos = {21.57, 1.06, -18.94},
+    rotY = 180,
+    scientist_GUID = 'b8c84b',
+    initBot_GUID = '5d7798',
+    labBotPos = {29.34, 1.48, -16.26},
+    engineer_GUID = 'dce324',
+    orderBot_GUID = 'b41cd6',
+    countMarker_GUID = '416d17',
+    pointsMarker_GUID = 'a78c23'
+  },
+  Blue = {
+    baseLabPos = {-21.84, 1.06, -19.08},
+    rotY = 180,
+    scientist_GUID = '1b9eb6',
+    initBot_GUID = '0b1fba',
+    labBotPos = {-42.65, 1.49, -16.24},
+    engineer_GUID = 'decf71',
+    orderBot_GUID = '1551b8',
+    countMarker_GUID = 'ef58a9',
+    pointsMarker_GUID = 'd6a886'
+  },
+  Yellow = {
+    baseLabPos = {-21.64, 1.06, 18.91},
+    rotY = 0,
+    scientist_GUID = '3f9686',
+    initBot_GUID = 'ce340c',
+    labBotPos = {-29.38, 1.49, 16.23},
+    engineer_GUID = '4e9fd3',
+    orderBot_GUID = '0420ec',
+    countMarker_GUID = '733077',
+    pointsMarker_GUID = '34aa8d'
+  }
+}
+
+local baseLabsBag_GUID = '173592'
+
+local botActionOrder = {
+  lab = 1,
+  time = 2,
+  crystal = 3,
+  octopode = 4,
+  submarine = 5,
+  research = 6,
+  bot = 7
+}
+
+local boardSegmentBotActions = {
+  A = 'research',
+  B = 'lab',
+  C = 'time',
+  D = 'octopode',
+  E = 'submarine',
+  F = 'crystal'
+}
+
+local function placeInitBot(player, baseLabLetter)
+  local action = boardSegmentBotActions[baseLabLetter]
+  local deltaX = (botActionOrder[action] - 1) * 1.5
+  if player.rotY == 0 then
+    deltaX = -deltaX
+  end
+  local initBotPos = player.labBotPos
+  initBotPos[1] = initBotPos[1] + deltaX
+  getObjectFromGUID(player.initBot_GUID).setPositionSmooth(initBotPos, false)
+end
+
+local function shufflePlayers(thePlayers)
+  local shuffled = {}
+  for i, player in ipairs(thePlayers) do
+  	local pos = math.random(1, i)
+  	table.insert(shuffled, pos, player)
+  end
+  return shuffled
+end
+
+local function setup(thePlayers)
+  local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
+  baseLabsBag.shuffle()
+  local shuffledPlayers = shufflePlayers(thePlayers)
+  for i, color in ipairs(shuffledPlayers) do
+    local player = players[color]
+    local baseLab = baseLabsBag.takeObject({
+      position          = player.baseLabPos,
+      rotation          = {0, player.rotY, 0}
+    })
+    baseLab.setLock(true)
+
+    placeInitBot(player, gmtools.parse(baseLab).letter)
+    -- TODO scientist_GUID
+  end
+  return shuffledPlayers
+end
+
+players.setup = setup
