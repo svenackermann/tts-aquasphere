@@ -66,7 +66,16 @@ local boardSegmentBotActions = {
   F = 'crystal'
 }
 
-local function placeInitBot(player, baseLabLetter)
+local boardScientistPos = {
+  {0.12, 1.83, 13.59},
+  {11.72, 1.83, 6.71},
+  {11.79, 1.83, -6.81},
+  {-0.08, 1.83, -13.90},
+  {-11.63, 1.83, -6.85},
+  {-11.59, 1.83, 6.46}
+}
+
+local function placeInitBotAndScientist(player, baseLabLetter, segmentsOrder)
   local action = boardSegmentBotActions[baseLabLetter]
   local deltaX = (botActionOrder[action] - 1) * 1.5
   if player.rotY == 0 then
@@ -75,6 +84,9 @@ local function placeInitBot(player, baseLabLetter)
   local initBotPos = player.labBotPos
   initBotPos[1] = initBotPos[1] + deltaX
   getObjectFromGUID(player.initBot_GUID).setPositionSmooth(initBotPos, false)
+
+  local scientistPos = boardScientistPos[segmentsOrder[baseLabLetter]]
+  getObjectFromGUID(player.scientist_GUID).setPositionSmooth(scientistPos, false)
 end
 
 function shufflePlayers(thePlayers)
@@ -89,9 +101,15 @@ function shufflePlayers(thePlayers)
   return shuffled
 end
 
-local function setup(thePlayers)
+local function setup(thePlayers, segments)
   local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
   baseLabsBag.shuffle()
+
+  local segmentsOrder = {}
+  for i, v in ipairs(segments) do
+     segmentsOrder[v] = i
+  end
+
   local shuffledPlayers = shufflePlayers(thePlayers)
   for i, color in ipairs(shuffledPlayers) do
     local player = players[color]
@@ -101,8 +119,7 @@ local function setup(thePlayers)
     })
     baseLab.setLock(true)
 
-    placeInitBot(player, gmtools.parse(baseLab).letter)
-    -- TODO scientist_GUID
+    placeInitBotAndScientist(player, gmtools.parse(baseLab).letter, segmentsOrder)
   end
   return shuffledPlayers
 end

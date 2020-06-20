@@ -1,4 +1,4 @@
-local boardSegment_GUIDs = {
+local boardSegments = {
   A = 'ba4a26',
   B = '88ac24',
   C = '5f06a8',
@@ -39,13 +39,15 @@ local labExtensionsPositions = {
   {-16.67, 2, 5.81}
 }
 
-local function shuffleBoardSegment_GUIDs()
-  local shuffled = {}
-  for k, v in pairs(boardSegment_GUIDs) do
-  	local pos = math.random(1, #shuffled + 1)
-  	table.insert(shuffled, pos, v)
+local function shuffleBoardSegments()
+  local guids = {}
+  local segments = {}
+  for k, v in pairs(boardSegments) do
+  	local pos = math.random(1, #guids + 1)
+  	table.insert(guids, pos, v)
+    table.insert(segments, pos, k)
   end
-  return shuffled
+  return guids, segments
 end
 
 local function setupCenterTiles(noPlayers)
@@ -97,8 +99,8 @@ local function discardTopCenterTile()
 end
 
 local function setup(noPlayers)
-  local segments = shuffleBoardSegment_GUIDs()
-  for i, segment_GUID in ipairs(segments) do
+  local segments_GUIDs, segments = shuffleBoardSegments()
+  for i, segment_GUID in ipairs(segments_GUIDs) do
     local segment = getObjectFromGUID(segment_GUID)
     segment.setPositionSmooth(boardSegmentPositions[i], false)
     segment.setRotation({0.00, 60 * (i - 1), 0.00})
@@ -109,6 +111,7 @@ local function setup(noPlayers)
   dealResearchCards()
   dealLabExtensions()
   setupCenterTiles(noPlayers)
+  return segments
 end
 
 local function nextRound()
