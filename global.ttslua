@@ -3,13 +3,15 @@
 #include <players>
 #include <headquarters>
 #include <board>
+#include <turns>
 
 function onLoad()
   local currentRound = getCurrentRound()
   if currentRound == 0 then
     showStartButton()
-    Turns.enable = false
+    turns.pause()
   elseif currentRound < 4 and headquarters.roundEndReached() then
+    --TODO will not work for single player
     showNextRoundButton()
   end
 end
@@ -97,12 +99,8 @@ function setupGame(thePlayers)
   board.setup(#thePlayers)
 
   local colors = players.setup(thePlayers)
-  if #getSeatedPlayers() > 1 then
-    Turns.type = 2
-    Turns.order = colors
-    Turns.turn_color = colors[1]
-    Turns.enable = true
-  else
+  turns.setup(colors)
+  if #getSeatedPlayers() < 2 then
     showNextRoundButton()
   end
   headquarters.setup(colors)

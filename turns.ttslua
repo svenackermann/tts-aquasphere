@@ -1,0 +1,48 @@
+local function pause()
+  Turns.enable = false
+end
+
+local function setup(colors)
+  if #getSeatedPlayers() > 1 then
+    Turns.type = 2
+    Turns.order = colors
+    Turns.turn_color = colors[1]
+    Turns.enable = true
+  end
+end
+
+-- global
+function onPlayerTurnEnd()
+  local currentRound = getCurrentRound()
+  if currentRound == 0 then
+    -- not set up yet
+    return
+  end
+  local order = Turns.order
+  local endRoundPlayers = headquarters.getEndRoundPlayers()
+  local noPlayers = #headquarters.getActivePlayers()
+
+  if noPlayers == #endRoundPlayers then
+    pause()
+    if currentRound < 4 then
+      showNextRoundButton()
+    end
+    broadcastToAll(msg.intermediateValuation, Color.Green)
+  elseif #endRoundPlayers + #order > noPlayers then
+    for i, endRoundPlayer in ipairs(endRoundPlayers) do
+      for j, color in ipairs(order) do
+        if endRoundPlayer == color then
+          table.remove(order, j)
+          local theMsg = msg.playerEndRound:format(msg.getPlayerName(color))
+          broadcastToAll(theMsg, Color.fromString(color))
+        end
+      end
+    end
+    Turns.order = order
+  end
+end
+
+turns = {
+  pause = pause,
+  setup = setup
+}

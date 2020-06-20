@@ -163,50 +163,16 @@ local function nextRound(round)
     local player = players[endRoundPlayer]
     lastEngineer = positionPlayerBotAndEngineer(player, i)
   end
-  if #getSeatedPlayers() > 1 then
-    local enableTurns = function()
-      Turns.order = endRoundPlayers
-      Turns.turn_color = endRoundPlayers[1]
-      Turns.enable = true
-    end
-    Wait.condition(enableTurns, function() return not lastEngineer.isSmoothMoving() end, 3, enableTurns)
+  local enableTurns = function()
+    turns.setup(endRoundPlayers)
   end
-end
-
--- global
-function onPlayerTurnEnd()
-  local currentRound = getCurrentRound()
-  if currentRound == 0 then
-    -- not set up yet
-    return
-  end
-  local order = Turns.order
-  local endRoundPlayers = getEndRoundPlayers()
-
-  local noPlayers = #getActivePlayers()
-  if noPlayers == #endRoundPlayers then
-    Turns.enable = false
-    if currentRound < 4 then
-      showNextRoundButton()
-    end
-    broadcastToAll(msg.intermediateValuation, Color.Green)
-  elseif #endRoundPlayers + #order > noPlayers then
-    for i, endRoundPlayer in ipairs(endRoundPlayers) do
-      for j, color in ipairs(order) do
-        if endRoundPlayer == color then
-          table.remove(order, j)
-          local theMsg = msg.playerEndRound:format(msg.getPlayerName(color))
-          broadcastToAll(theMsg, Color.fromString(color))
-        end
-      end
-    end
-    Turns.order = order
-  end
+  Wait.condition(enableTurns, function() return not lastEngineer.isSmoothMoving() end, 3, enableTurns)
 end
 
 headquarters = {
   setup = setup,
   getActivePlayers = getActivePlayers,
+  getEndRoundPlayers = getEndRoundPlayers,
   roundEndReached = roundEndReached,
   nextRound = nextRound
 }
