@@ -50,6 +50,8 @@ players = {
 }
 
 local baseLabsBag_GUID = '173592'
+local greySubmarinesBag_GUID = '5234d5'
+local greyBotsBag_GUID = 'c2a84e'
 
 local botActionOrder = {
   lab = 1,
@@ -105,6 +107,39 @@ function shufflePlayers(thePlayers)
   return shuffled
 end
 
+local function setupRemainingSegments(baseLabsBag, segmentsOrder)
+  local remainingBaseLabs = baseLabsBag.getObjects()
+  local size = #remainingBaseLabs
+
+  local nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size].gm_notes).letter
+  local segmentIndex = segmentsOrder[nextLetter]
+  board.placeOctopodes(segmentIndex, 2)
+  board.placeCrystals(segmentIndex, 1)
+  --TODO bot for 3 players
+
+  nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 1].gm_notes).letter
+  segmentIndex = segmentsOrder[nextLetter]
+  board.placeOctopodes(segmentIndex, 3)
+  board.placeCrystals(segmentIndex, 2)
+  --TODO bot for 3 players
+
+  if size > 2 then
+    nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 2].gm_notes).letter
+    segmentIndex = segmentsOrder[nextLetter]
+
+    local greySubmarinesBag = getObjectFromGUID(greySubmarinesBag_GUID)
+    local submarine = greySubmarinesBag.takeObject({smooth = false})
+    board.placeSubmarine(segmentIndex, submarine)
+    --TODO bot for 3 players
+    if size > 3 then
+      nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 3].gm_notes).letter
+      segmentIndex = segmentsOrder[nextLetter]
+      submarine = greySubmarinesBag.takeObject({smooth = false})
+      board.placeSubmarine(segmentIndex, submarine)
+    end
+  end
+end
+
 function players.setup(thePlayers, segments)
   local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
   baseLabsBag.shuffle()
@@ -132,6 +167,11 @@ function players.setup(thePlayers, segments)
     board.placeTime(segmentIndex, 4)
     local submarine = getObjectFromGUID(player.initSubmarine_GUID)
     board.placeSubmarine(segmentIndex, submarine)
+
+    --TODO give time to players
   end
+
+  setupRemainingSegments(baseLabsBag, segmentsOrder)
+
   return shuffledPlayers
 end
