@@ -1,3 +1,5 @@
+board = {}
+
 local boardSegments = {
   A = 'ba4a26',
   B = '88ac24',
@@ -7,7 +9,7 @@ local boardSegments = {
   F = '56bf39'
 }
 
-local boardSegmentPositions = {
+local segmentPositions = {
   {0.04, 1.06, 9.74},
   {8.60, 1.06, 4.74},
   {8.60, 1.06, -5.14},
@@ -20,6 +22,9 @@ local centerTilesBag_GUID = '478ccc'
 local centerTilesScriptingZone_GUID = '4b43f2'
 local labExtensionsBag_GUID = '38554f'
 local researchCardsStack_GUID = 'b9d782'
+local octopodesBag_GUID = '612de1'
+local crystalBag_GUID = 'e3cb69'
+local timeBag_GUID = 'ec8424'
 
 local researchCardPositions = {
   {3.40, 2, 17.62},
@@ -37,6 +42,45 @@ local labExtensionsPositions = {
   {3.10, 2, -17.63},
   {-13.55, 2, -11.65},
   {-16.67, 2, 5.81}
+}
+
+local segmentZones = {
+  {
+    submarines = {'7f4251', 'ed1ab3', '3f674c', '3f85bb'},
+    time = 'd86a80',
+    octopode = 'd633eb',
+    crystal = '7afdf8'
+  },
+  {
+    submarines = {'58ccec', 'e898aa', 'eba5d1', 'a37acd'},
+    time = '8ed132',
+    octopode = '0889ed',
+    crystal = 'c9acd1'
+  },
+  {
+    submarines = {'f74218', '5d74f7', '67ab90', '4c9bce'},
+    time = '834906',
+    octopode = 'e67669',
+    crystal = '5f836a'
+  },
+  {
+    submarines = {'4c6dce', '0cacd2', '414109', '602f03'},
+    time = 'a4eff6',
+    octopode = '73f7d9',
+    crystal = '7db834'
+  },
+  {
+    submarines = {'eb704f', '3d533b', '6a723f', '620aec'},
+    time = '975fae',
+    octopode = 'a2141a',
+    crystal = '8d4a78'
+  },
+  {
+    submarines = {'90bbc8', 'bcbeb5', 'aa3206', '71dafb'},
+    time = '539938',
+    octopode = '856985',
+    crystal = '29812b'
+  }
 }
 
 local function shuffleBoardSegments()
@@ -83,12 +127,12 @@ local function dealLabExtensions()
   end
 end
 
-local function getPlacedCenterTiles()
+function board.getPlacedCenterTiles()
   return gmtools.getObjectsFromZone(centerTilesScriptingZone_GUID, {type = 'centerTile'})
 end
 
 local function discardTopCenterTile()
-  local centerTiles = getPlacedCenterTiles()
+  local centerTiles = board.getPlacedCenterTiles()
   local topCenterTile = centerTiles[1]
   for i = 2, #centerTiles do
     if topCenterTile.getPosition().y < centerTiles[i].getPosition().y then
@@ -98,11 +142,63 @@ local function discardTopCenterTile()
   getObjectFromGUID(centerTilesBag_GUID).putObject(topCenterTile)
 end
 
-local function setup(noPlayers)
+local function placeTokenInZone(segmentIndex, count, bag_GUID, zoneId)
+  local bag = getObjectFromGUID(bag_GUID)
+  local zone = getObjectFromGUID(segmentZones[segmentIndex][zoneId])
+  local pos = zone.getPosition()
+  pos.y = 3
+  for i = 1, count do
+    bag.takeObject({
+      position = pos,
+      rotation = zone.getRotation()
+    })
+    pos.y = pos.y + 0.5
+  end
+end
+
+function board.placeOctopodes(segmentIndex, count)
+  placeTokenInZone(segmentIndex, count, octopodesBag_GUID, 'octopode')
+end
+
+function board.placeCrystals(segmentIndex, count)
+  placeTokenInZone(segmentIndex, count, crystalBag_GUID, 'crystal')
+end
+
+function board.placeTime(segmentIndex, count)
+  placeTokenInZone(segmentIndex, count, timeBag_GUID, 'time')
+end
+
+local function tryPlaceSubmarine(segmentIndex, submarine)
+  local zones = segmentZones[segmentIndex].submarines
+  for i, zone_GUID in ipairs(zones) do
+    local subsInZone = gmtools.getObjectsFromZone(zone_GUID, {type = 'submarine'})
+    if #subsInZone == 0 then
+      local zone = getObjectFromGUID(zone_GUID)
+      submarine.setPositionSmooth(zone.getPosition(), false)
+      submarine.setRotationSmooth(zone.getRotation(), false)
+      return true
+    else
+      if subsInZone[1].getColorTint() == submarine.getColorTint() then
+        return false
+      end
+    end
+  end
+  return false
+end
+
+function board.placeSubmarine(segmentIndex, submarine)
+  local placed = false
+  while not placed do
+    placed = tryPlaceSubmarine(segmentIndex, submarine)
+    segmentIndex = (segmentIndex % 6) + 1
+  end
+end
+
+function board.setup(noPlayers)
   local segments_GUIDs, segments = shuffleBoardSegments()
   for i, segment_GUID in ipairs(segments_GUIDs) do
     local segment = getObjectFromGUID(segment_GUID)
-    segment.setPositionSmooth(boardSegmentPositions[i], false)
+    segment.setPositionSmooth(segmentPositions[i], false)
     segment.setRotation({0.00, 60 * (i - 1), 0.00})
   end
 
@@ -111,17 +207,12 @@ local function setup(noPlayers)
   dealResearchCards()
   dealLabExtensions()
   setupCenterTiles(noPlayers)
+
   return segments
 end
 
-local function nextRound()
+function board.nextRound()
   discardTopCenterTile()
   dealResearchCards()
   dealLabExtensions()
 end
-
-board = {
-  setup = setup,
-  nextRound = nextRound,
-  getPlacedCenterTiles = getPlacedCenterTiles
-}

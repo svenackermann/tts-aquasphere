@@ -25,13 +25,10 @@ local function getPlayerName(color)
   end
 end
 
-local function broadcastStartPlayer(color)
+function msg.broadcastStartPlayer(color)
   broadcastToAll(msg.startPlayer:format(getPlayerName(color)), Color.fromString(color))
 end
 
-local function broadcastPlayerRoundEnd(color)
+function msg.broadcastPlayerRoundEnd(color)
   broadcastToAll(msg.playerEndRound:format(getPlayerName(color)), Color.fromString(color))
 end
-
-msg.broadcastStartPlayer = broadcastStartPlayer
-msg.broadcastPlayerRoundEnd = broadcastPlayerRoundEnd

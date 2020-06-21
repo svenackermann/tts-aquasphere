@@ -1,3 +1,5 @@
+headquarters = {}
+
 local programCardsBag_GUID = 'd05ff3'
 local nextProgramCardZone_GUID = '38a0c6'
 
@@ -66,7 +68,7 @@ local orderBotZones_GUIDs = {
   '8cd6a0'
 }
 
-local function getActivePlayers()
+function headquarters.getActivePlayers()
   local result = {}
   for i, zone_GUID in ipairs(orderBotZones_GUIDs) do
     local orderBots = gmtools.getObjectsFromZone(zone_GUID, {type = 'orderBot'})
@@ -78,7 +80,7 @@ local function getActivePlayers()
   return result
 end
 
-local function getEndRoundPlayers()
+function headquarters.getEndRoundPlayers()
   local players = {}
   for i, zone_GUID in ipairs(engineerEndRoundZones_GUIDs) do
     local engineers = gmtools.getObjectsFromZone(zone_GUID, {type = 'engineer'})
@@ -89,9 +91,9 @@ local function getEndRoundPlayers()
   return players
 end
 
-local function roundEndReached()
-  local activePlayers = getActivePlayers()
-  local endRoundPlayers = getEndRoundPlayers()
+function headquarters.roundEndReached()
+  local activePlayers = headquarters.getActivePlayers()
+  local endRoundPlayers = headquarters.getEndRoundPlayers()
   return #activePlayers == #endRoundPlayers
 end
 
@@ -139,7 +141,7 @@ local function applyProgramCard(callback)
   end
 end
 
-local function setup(colors)
+function headquarters.setup(colors)
   getObjectFromGUID(programCardsBag_GUID).shuffle()
   dealProgramCard(function() applyProgramCard(dealProgramCard) end)
   for i, color in ipairs(colors) do
@@ -150,14 +152,14 @@ local function setup(colors)
   end
 end
 
-local function nextRound(round)
+function headquarters.nextRound(round)
   local dealNextProgramCard
   if round < 4 then
     dealNextProgramCard = dealProgramCard
   end
   applyProgramCard(dealNextProgramCard)
 
-  local endRoundPlayers = getEndRoundPlayers()
+  local endRoundPlayers = headquarters.getEndRoundPlayers()
   local lastEngineer
   for i, endRoundPlayer in ipairs(endRoundPlayers) do
     local player = players[endRoundPlayer]
@@ -168,11 +170,3 @@ local function nextRound(round)
   end
   Wait.condition(enableTurns, function() return not lastEngineer.isSmoothMoving() end, 3, enableTurns)
 end
-
-headquarters = {
-  setup = setup,
-  getActivePlayers = getActivePlayers,
-  getEndRoundPlayers = getEndRoundPlayers,
-  roundEndReached = roundEndReached,
-  nextRound = nextRound
-}

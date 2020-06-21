@@ -1,8 +1,10 @@
+turns = {}
+
 local function pause()
   Turns.enable = false
 end
 
-local function setup(colors)
+function turns.setup(colors)
   if #getSeatedPlayers() > 1 then
     Turns.type = 2
     Turns.order = colors
@@ -53,7 +55,3 @@ function onPlayerTurnEnd()
     Turns.order = order
   end
 end
-
-turns = {
-  setup = setup
-}

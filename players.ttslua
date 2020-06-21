@@ -4,6 +4,7 @@ players = {
     rotY = 0,
     scientist_GUID = 'c3f106',
     initBot_GUID = '7093d9',
+    initSubmarine_GUID = 'f322bd',
     labBotPos = {42.64, 1.49, 16.26},
     engineer_GUID = '6c48a0',
     orderBot_GUID = '93cf49',
@@ -15,6 +16,7 @@ players = {
     rotY = 180,
     scientist_GUID = 'b8c84b',
     initBot_GUID = '5d7798',
+    initSubmarine_GUID = 'e9e19f',
     labBotPos = {29.34, 1.48, -16.26},
     engineer_GUID = 'dce324',
     orderBot_GUID = 'b41cd6',
@@ -26,6 +28,7 @@ players = {
     rotY = 180,
     scientist_GUID = '1b9eb6',
     initBot_GUID = '0b1fba',
+    initSubmarine_GUID = 'ff537d',
     labBotPos = {-42.65, 1.49, -16.24},
     engineer_GUID = 'decf71',
     orderBot_GUID = '1551b8',
@@ -37,6 +40,7 @@ players = {
     rotY = 0,
     scientist_GUID = '3f9686',
     initBot_GUID = 'ce340c',
+    initSubmarine_GUID = 'bea65d',
     labBotPos = {-29.38, 1.49, 16.23},
     engineer_GUID = '4e9fd3',
     orderBot_GUID = '0420ec',
@@ -75,7 +79,7 @@ local boardScientistPos = {
   {-11.59, 1.83, 6.46}
 }
 
-local function placeInitBotAndScientist(player, baseLabLetter, segmentsOrder)
+local function placeInitBotAndScientist(player, baseLabLetter, segmentIndex)
   local action = boardSegmentBotActions[baseLabLetter]
   local deltaX = (botActionOrder[action] - 1) * 1.5
   if player.rotY == 0 then
@@ -85,7 +89,7 @@ local function placeInitBotAndScientist(player, baseLabLetter, segmentsOrder)
   initBotPos[1] = initBotPos[1] + deltaX
   getObjectFromGUID(player.initBot_GUID).setPositionSmooth(initBotPos, false)
 
-  local scientistPos = boardScientistPos[segmentsOrder[baseLabLetter]]
+  local scientistPos = boardScientistPos[segmentIndex]
   getObjectFromGUID(player.scientist_GUID).setPositionSmooth(scientistPos, false)
 end
 
@@ -101,7 +105,7 @@ function shufflePlayers(thePlayers)
   return shuffled
 end
 
-local function setup(thePlayers, segments)
+function players.setup(thePlayers, segments)
   local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
   baseLabsBag.shuffle()
 
@@ -119,9 +123,15 @@ local function setup(thePlayers, segments)
     })
     baseLab.setLock(true)
 
-    placeInitBotAndScientist(player, gmtools.parse(baseLab).letter, segmentsOrder)
+    local baseLabLetter = gmtools.parse(baseLab).letter
+    local segmentIndex = segmentsOrder[baseLabLetter]
+
+    placeInitBotAndScientist(player, baseLabLetter, segmentIndex)
+    board.placeOctopodes(segmentIndex, 1)
+    board.placeCrystals(segmentIndex, 1)
+    board.placeTime(segmentIndex, 4)
+    local submarine = getObjectFromGUID(player.initSubmarine_GUID)
+    board.placeSubmarine(segmentIndex, submarine)
   end
   return shuffledPlayers
 end
-
-players.setup = setup
