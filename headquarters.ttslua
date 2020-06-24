@@ -7,7 +7,7 @@ local programTiles_GUIDs = {
   lab = '030cb4',
   time = '426956',
   crystal = 'eebb92',
-  octopode = '715fc2',
+  octopod = '715fc2',
   submarine = '321819',
   research = 'f8d224',
   bot = '9ecb7e',
@@ -25,43 +25,43 @@ local programPositions = {
 
 local programCardSetups = {
   {
-    {'time', 'submarine', 'bot', 'lab', 'research', 'crystal', 'octopode'},
-    {'research', 'octopode', 'bot', 'lab', 'submarine', 'crystal', 'time'}
+    {'time', 'submarine', 'bot', 'lab', 'research', 'crystal', 'octopod'},
+    {'research', 'octopod', 'bot', 'lab', 'submarine', 'crystal', 'time'}
   },
   {
-    {'research', 'lab', 'octopode', 'time', 'submarine', 'bot', 'crystal'},
-    {'research', 'submarine', 'lab', 'crystal', 'bot', 'octopode', 'time'}
+    {'research', 'lab', 'octopod', 'time', 'submarine', 'bot', 'crystal'},
+    {'research', 'submarine', 'lab', 'crystal', 'bot', 'octopod', 'time'}
   },
   {
-    {'research', 'bot', 'submarine', 'octopode', 'lab', 'time', 'crystal'},
-    {'research', 'bot', 'submarine', 'octopode', 'lab', 'time', 'crystal'}
+    {'research', 'bot', 'submarine', 'octopod', 'lab', 'time', 'crystal'},
+    {'research', 'bot', 'submarine', 'octopod', 'lab', 'time', 'crystal'}
   },
   {
-    {'crystal', 'bot', 'submarine', 'research', 'lab', 'octopode', 'time'},
-    {'lab', 'time', 'submarine', 'research', 'octopode', 'bot', 'crystal'}
+    {'crystal', 'bot', 'submarine', 'research', 'lab', 'octopod', 'time'},
+    {'lab', 'time', 'submarine', 'research', 'octopod', 'bot', 'crystal'}
   },
   {
-    {'lab', 'crystal', 'time', 'bot', 'submarine', 'research', 'octopode'},
-    {'crystal', 'bot', 'research', 'time', 'submarine', 'lab', 'octopode'}
+    {'lab', 'crystal', 'time', 'bot', 'submarine', 'research', 'octopod'},
+    {'crystal', 'bot', 'research', 'time', 'submarine', 'lab', 'octopod'}
   },
   {
-    {'time', 'octopode', 'crystal', 'research', 'lab', 'submarine', 'bot'},
-    {'submarine', 'octopode', 'time', 'crystal', 'lab', 'research', 'bot'}
+    {'time', 'octopod', 'crystal', 'research', 'lab', 'submarine', 'bot'},
+    {'submarine', 'octopod', 'time', 'crystal', 'lab', 'research', 'bot'}
   },
   {
-    {'submarine', 'time', 'octopode', 'bot', 'research', 'lab', 'crystal'},
-    {'crystal', 'octopode', 'lab', 'submarine', 'research', 'time', 'bot'}
+    {'submarine', 'time', 'octopod', 'bot', 'research', 'lab', 'crystal'},
+    {'crystal', 'octopod', 'lab', 'submarine', 'research', 'time', 'bot'}
   }
 }
 
-local engineerEndRoundZones_GUIDs = {
+local passOrderZones_GUIDs = {
   'b5dbde',
   'ea25be',
   '1e0f44',
   '4edc7d'
 }
 
-local orderBotZones_GUIDs = {
+local turnOrderZones_GUIDs = {
   'c48b5b',
   '5c5b58',
   'ff677c',
@@ -70,7 +70,7 @@ local orderBotZones_GUIDs = {
 
 function headquarters.getActivePlayers()
   local result = {}
-  for i, zone_GUID in ipairs(orderBotZones_GUIDs) do
+  for i, zone_GUID in ipairs(turnOrderZones_GUIDs) do
     local orderBots = gmtools.getObjectsFromZone(zone_GUID, {type = 'orderBot'})
     if #orderBots > 0 then
       local info = gmtools.parse(orderBots[1])
@@ -80,9 +80,9 @@ function headquarters.getActivePlayers()
   return result
 end
 
-function headquarters.getEndRoundPlayers()
+function headquarters.getPassedPlayers()
   local players = {}
-  for i, zone_GUID in ipairs(engineerEndRoundZones_GUIDs) do
+  for i, zone_GUID in ipairs(passOrderZones_GUIDs) do
     local engineers = gmtools.getObjectsFromZone(zone_GUID, {type = 'engineer'})
     if #engineers > 0 then
       table.insert(players, gmtools.parse(engineers[1]).color)
@@ -93,14 +93,14 @@ end
 
 function headquarters.roundEndReached()
   local activePlayers = headquarters.getActivePlayers()
-  local endRoundPlayers = headquarters.getEndRoundPlayers()
-  return #activePlayers == #endRoundPlayers
+  local passedPlayers = headquarters.getPassedPlayers()
+  return #activePlayers == #passedPlayers
 end
 
-local function positionPlayerBotAndEngineer(player, pos)
+local function positionOrderBotAndEngineer(player, pos)
   local engineer = getObjectFromGUID(player.engineer_GUID)
   engineer.setPositionSmooth({-30.1 - 1.1 * pos, 1.83, 6.4}, false)
-  local zonePos = getObjectFromGUID(orderBotZones_GUIDs[pos]).getPosition()
+  local zonePos = getObjectFromGUID(turnOrderZones_GUIDs[pos]).getPosition()
   zonePos.y = 1.6
   local orderBot = getObjectFromGUID(player.orderBot_GUID)
   orderBot.setLock(true)
@@ -124,11 +124,11 @@ local function applyProgramCard(callback)
   card.setPositionSmooth({-50, 1.1, -3}, false)
   card.setRotationSmooth({0, 90, rotZ}, false)
   local cardNo = gmtools.parse(card).no
-  local frontOrBagIndex = 1
+  local frontOrBackIndex = 1
   if rotZ > 90 then
-    frontOrBagIndex = 2
+    frontOrBackIndex = 2
   end
-  local cardSetup = programCardSetups[cardNo][frontOrBagIndex]
+  local cardSetup = programCardSetups[cardNo][frontOrBackIndex]
   for i, programPosition in ipairs(programPositions) do
     local actionType = cardSetup[i]
     local programTile = getObjectFromGUID(programTiles_GUIDs[actionType])
@@ -146,7 +146,7 @@ function headquarters.setup(colors)
   dealProgramCard(function() applyProgramCard(dealProgramCard) end)
   for i, color in ipairs(colors) do
     local player = players[color]
-    positionPlayerBotAndEngineer(player, i)
+    positionOrderBotAndEngineer(player, i)
     getObjectFromGUID(player.countMarker_GUID).setPositionSmooth({-26.85, 0.89 + i, 3.39}, false)
     getObjectFromGUID(player.pointsMarker_GUID).setPositionSmooth({-24.52, 0.89 + i, 2.10}, false)
   end
@@ -159,14 +159,14 @@ function headquarters.nextRound(round)
   end
   applyProgramCard(dealNextProgramCard)
 
-  local endRoundPlayers = headquarters.getEndRoundPlayers()
+  local passedPlayers = headquarters.getPassedPlayers()
   local lastEngineer
-  for i, endRoundPlayer in ipairs(endRoundPlayers) do
-    local player = players[endRoundPlayer]
-    lastEngineer = positionPlayerBotAndEngineer(player, i)
+  for i, passedPlayer in ipairs(passedPlayers) do
+    local player = players[passedPlayer]
+    lastEngineer = positionOrderBotAndEngineer(player, i)
   end
   local enableTurns = function()
-    turns.setup(endRoundPlayers)
+    turns.setup(passedPlayers)
   end
   Wait.condition(enableTurns, function() return not lastEngineer.isSmoothMoving() end, 3, enableTurns)
 end

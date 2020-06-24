@@ -85,9 +85,9 @@ end
 function setupGame(thePlayers)
   hideButtons()
   math.randomseed(os.time())
-  local segments = board.setup(#thePlayers)
+  local sectors = board.setup(#thePlayers)
 
-  local colors = players.setup(thePlayers, segments)
+  local colors = players.setup(thePlayers, sectors)
   turns.setup(colors)
   headquarters.setup(colors)
   msg.broadcastStartPlayer(colors[1])

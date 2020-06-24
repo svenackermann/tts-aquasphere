@@ -34,19 +34,19 @@ function onPlayerTurnEnd()
     return
   end
   local order = Turns.order
-  local endRoundPlayers = headquarters.getEndRoundPlayers()
+  local passedPlayers = headquarters.getPassedPlayers()
   local noPlayers = #headquarters.getActivePlayers()
 
-  if noPlayers == #endRoundPlayers then
+  if noPlayers == #passedPlayers then
     pause()
     if currentRound < 4 then
       showNextRoundButton()
     end
     broadcastToAll(msg.intermediateValuation, Color.Green)
-  elseif #endRoundPlayers + #order > noPlayers then
-    for i, endRoundPlayer in ipairs(endRoundPlayers) do
+  elseif #passedPlayers + #order > noPlayers then
+    for i, passedPlayer in ipairs(passedPlayers) do
       for j, color in ipairs(order) do
-        if endRoundPlayer == color then
+        if passedPlayer == color then
           table.remove(order, j)
           msg.broadcastPlayerRoundEnd(color)
         end

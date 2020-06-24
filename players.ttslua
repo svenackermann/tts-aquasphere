@@ -57,17 +57,17 @@ local botActionOrder = {
   lab = 1,
   time = 2,
   crystal = 3,
-  octopode = 4,
+  octopod = 4,
   submarine = 5,
   research = 6,
   bot = 7
 }
 
-local boardSegmentBotActions = {
+local boardSectorBotActions = {
   A = 'research',
   B = 'lab',
   C = 'time',
-  D = 'octopode',
+  D = 'octopod',
   E = 'submarine',
   F = 'crystal'
 }
@@ -81,8 +81,8 @@ local boardScientistPos = {
   {-11.59, 1.83, 6.46}
 }
 
-local function placeInitBotAndScientist(player, baseLabLetter, segmentIndex)
-  local action = boardSegmentBotActions[baseLabLetter]
+local function placeInitBotAndScientist(player, baseLabLetter, sectorIndex)
+  local action = boardSectorBotActions[baseLabLetter]
   local deltaX = (botActionOrder[action] - 1) * 1.5
   if player.rotY == 0 then
     deltaX = -deltaX
@@ -91,7 +91,7 @@ local function placeInitBotAndScientist(player, baseLabLetter, segmentIndex)
   initBotPos[1] = initBotPos[1] + deltaX
   getObjectFromGUID(player.initBot_GUID).setPositionSmooth(initBotPos, false)
 
-  local scientistPos = boardScientistPos[segmentIndex]
+  local scientistPos = boardScientistPos[sectorIndex]
   getObjectFromGUID(player.scientist_GUID).setPositionSmooth(scientistPos, false)
 end
 
@@ -107,46 +107,46 @@ function shufflePlayers(thePlayers)
   return shuffled
 end
 
-local function setupRemainingSegments(baseLabsBag, segmentsOrder)
+local function setupRemainingSectors(baseLabsBag, sectorsOrder)
   local remainingBaseLabs = baseLabsBag.getObjects()
   local size = #remainingBaseLabs
 
   local nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size].gm_notes).letter
-  local segmentIndex = segmentsOrder[nextLetter]
-  board.placeOctopodes(segmentIndex, 2)
-  board.placeCrystals(segmentIndex, 1)
+  local sectorIndex = sectorsOrder[nextLetter]
+  board.placeOctopods(sectorIndex, 2)
+  board.placeCrystals(sectorIndex, 1)
   --TODO bot for 3 players
 
   nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 1].gm_notes).letter
-  segmentIndex = segmentsOrder[nextLetter]
-  board.placeOctopodes(segmentIndex, 3)
-  board.placeCrystals(segmentIndex, 2)
+  sectorIndex = sectorsOrder[nextLetter]
+  board.placeOctopods(sectorIndex, 3)
+  board.placeCrystals(sectorIndex, 2)
   --TODO bot for 3 players
 
   if size > 2 then
     nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 2].gm_notes).letter
-    segmentIndex = segmentsOrder[nextLetter]
+    sectorIndex = sectorsOrder[nextLetter]
 
     local greySubmarinesBag = getObjectFromGUID(greySubmarinesBag_GUID)
     local submarine = greySubmarinesBag.takeObject({smooth = false})
-    board.placeSubmarine(segmentIndex, submarine)
+    board.placeSubmarine(sectorIndex, submarine)
     --TODO bot for 3 players
     if size > 3 then
       nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 3].gm_notes).letter
-      segmentIndex = segmentsOrder[nextLetter]
+      sectorIndex = sectorsOrder[nextLetter]
       submarine = greySubmarinesBag.takeObject({smooth = false})
-      board.placeSubmarine(segmentIndex, submarine)
+      board.placeSubmarine(sectorIndex, submarine)
     end
   end
 end
 
-function players.setup(thePlayers, segments)
+function players.setup(thePlayers, sectors)
   local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
   baseLabsBag.shuffle()
 
-  local segmentsOrder = {}
-  for i, v in ipairs(segments) do
-     segmentsOrder[v] = i
+  local sectorsOrder = {}
+  for i, v in ipairs(sectors) do
+     sectorsOrder[v] = i
   end
 
   local shuffledPlayers = shufflePlayers(thePlayers)
@@ -159,19 +159,19 @@ function players.setup(thePlayers, segments)
     baseLab.setLock(true)
 
     local baseLabLetter = gmtools.parse(baseLab).letter
-    local segmentIndex = segmentsOrder[baseLabLetter]
+    local sectorIndex = sectorsOrder[baseLabLetter]
 
-    placeInitBotAndScientist(player, baseLabLetter, segmentIndex)
-    board.placeOctopodes(segmentIndex, 1)
-    board.placeCrystals(segmentIndex, 1)
-    board.placeTime(segmentIndex, 4)
+    placeInitBotAndScientist(player, baseLabLetter, sectorIndex)
+    board.placeOctopods(sectorIndex, 1)
+    board.placeCrystals(sectorIndex, 1)
+    board.placeTime(sectorIndex, 4)
     local submarine = getObjectFromGUID(player.initSubmarine_GUID)
-    board.placeSubmarine(segmentIndex, submarine)
+    board.placeSubmarine(sectorIndex, submarine)
 
     --TODO give time to players
   end
 
-  setupRemainingSegments(baseLabsBag, segmentsOrder)
+  setupRemainingSectors(baseLabsBag, sectorsOrder)
 
   return shuffledPlayers
 end
