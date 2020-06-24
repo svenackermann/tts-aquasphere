@@ -47,37 +47,43 @@ local sectorZones = {
     submarines = {'7f4251', 'ed1ab3', '3f674c', '3f85bb'},
     time = 'd86a80',
     octopod = 'd633eb',
-    crystal = '7afdf8'
+    crystal = '7afdf8',
+    loadingStations = {'5ff1d9'}
   },
   {
     submarines = {'58ccec', 'e898aa', 'eba5d1', 'a37acd'},
     time = '8ed132',
     octopod = '0889ed',
-    crystal = 'c9acd1'
+    crystal = 'c9acd1',
+    loadingStations = {'a98469'}
   },
   {
     submarines = {'f74218', '5d74f7', '67ab90', '4c9bce'},
     time = '834906',
     octopod = 'e67669',
-    crystal = '5f836a'
+    crystal = '5f836a',
+    loadingStations = {'5b78be'}
   },
   {
     submarines = {'4c6dce', '0cacd2', '414109', '602f03'},
     time = 'a4eff6',
     octopod = '73f7d9',
-    crystal = '7db834'
+    crystal = '7db834',
+    loadingStations = {'7f898b'}
   },
   {
     submarines = {'eb704f', '3d533b', '6a723f', '620aec'},
     time = '975fae',
     octopod = 'a2141a',
-    crystal = '8d4a78'
+    crystal = '8d4a78',
+    loadingStations = {'881c87'}
   },
   {
     submarines = {'90bbc8', 'bcbeb5', 'aa3206', '71dafb'},
     time = '539938',
     octopod = '856985',
-    crystal = '29812b'
+    crystal = '29812b',
+    loadingStations = {'741281'}
   }
 }
 
@@ -163,6 +169,16 @@ function board.placeSubmarine(sectorIndex, submarine)
     placed = tryPlaceSubmarine(sectorIndex, submarine)
     sectorIndex = (sectorIndex % 6) + 1
   end
+end
+
+function board.placeBotToLoad(sectorIndex, bot)
+  -- TODO works only for first bot currently
+  local zone_GUID = sectorZones[sectorIndex].loadingStations[1]
+  local zone = getObjectFromGUID(zone_GUID)
+  local pos = zone.getPosition()
+  pos.y = 1.59
+  bot.setPositionSmooth(pos, false)
+  bot.setRotationSmooth(zone.getRotation(), false)
 end
 
 function board.setup()

@@ -107,6 +107,14 @@ function shufflePlayers(thePlayers)
   return shuffled
 end
 
+local function placeGreyBot(sectorIndex, remainingBaseLabs)
+  if remainingBaseLabs == 3 then
+    local bot = getObjectFromGUID(greyBotsBag_GUID).takeObject({smooth = false})
+    board.placeBotToLoad(sectorIndex, bot)
+    bot.setLock(true)
+  end
+end
+
 local function setupRemainingSectors(baseLabsBag, sectorsOrder)
   local remainingBaseLabs = baseLabsBag.getObjects()
   local size = #remainingBaseLabs
@@ -115,13 +123,13 @@ local function setupRemainingSectors(baseLabsBag, sectorsOrder)
   local sectorIndex = sectorsOrder[nextLetter]
   board.placeOctopods(sectorIndex, 2)
   board.placeCrystals(sectorIndex, 1)
-  --TODO bot for 3 players
+  placeGreyBot(sectorIndex, size)
 
   nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 1].gm_notes).letter
   sectorIndex = sectorsOrder[nextLetter]
   board.placeOctopods(sectorIndex, 3)
   board.placeCrystals(sectorIndex, 2)
-  --TODO bot for 3 players
+  placeGreyBot(sectorIndex, size)
 
   if size > 2 then
     nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 2].gm_notes).letter
@@ -130,7 +138,7 @@ local function setupRemainingSectors(baseLabsBag, sectorsOrder)
     local greySubmarinesBag = getObjectFromGUID(greySubmarinesBag_GUID)
     local submarine = greySubmarinesBag.takeObject({smooth = false})
     board.placeSubmarine(sectorIndex, submarine)
-    --TODO bot for 3 players
+    placeGreyBot(sectorIndex, size)
     if size > 3 then
       nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 3].gm_notes).letter
       sectorIndex = sectorsOrder[nextLetter]
