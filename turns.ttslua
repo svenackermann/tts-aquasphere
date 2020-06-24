@@ -15,7 +15,7 @@ end
 
 -- global
 function onPlayerTurnEnd()
-  local currentRound = getCurrentRound()
+  local currentRound = rounds.getCurrent()
   if currentRound == 0 then
     -- not set up yet
     return

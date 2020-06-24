@@ -1,0 +1,36 @@
+rounds = {}
+
+--global
+function onLoad()
+  local currentRound = rounds.getCurrent()
+  if currentRound == 0 then
+    showStartButton()
+  elseif currentRound < 4 then
+    showNextRoundButton()
+  end
+end
+
+function rounds.next()
+  local currentRound = rounds.getCurrent()
+  if currentRound >= 4 then
+    return
+  end
+
+  board.nextRound()
+  centerTiles.nextRound()
+  headquarters.nextRound(currentRound + 1)
+
+  if currentRound >= 3 then
+    hideButtons()
+  end
+  -- TODO clean board
+end
+
+function rounds.getCurrent()
+  local centerTiles = centerTiles.getPlaced()
+  if #centerTiles == 0 then
+    return 0
+  else
+    return 5 - #centerTiles
+  end
+end

@@ -5,15 +5,7 @@
 #include <board>
 #include <centerTiles>
 #include <turns>
-
-function onLoad()
-  local currentRound = getCurrentRound()
-  if currentRound == 0 then
-    showStartButton()
-  elseif currentRound < 4 then
-    showNextRoundButton()
-  end
-end
+#include <rounds>
 
 setup3PlayersCard_GUID = 'a8734f'
 function showStartButton()
@@ -105,30 +97,9 @@ function setupGame(thePlayers)
 end
 
 function nextRound(obj, color)
-  local currentRound = getCurrentRound()
-  if currentRound >= 4 then
-    return
-  end
-  if not headquarters.roundEndReached() then
-    broadcastToColor(msg.roundNotEnded, color, Color.Red)
-    return
-  end
-
-  board.nextRound()
-  centerTiles.nextRound()
-  headquarters.nextRound(currentRound + 1)
-
-  if currentRound >= 3 then
-    hideButtons()
-  end
-  -- TODO clean board
-end
-
-function getCurrentRound()
-  local centerTiles = centerTiles.getPlaced()
-  if #centerTiles == 0 then
-    return 0
+  if headquarters.roundEndReached() then
+    rounds.next()
   else
-    return 5 - #centerTiles
+    broadcastToColor(msg.roundNotEnded, color, Color.Red)
   end
 end
