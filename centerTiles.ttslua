@@ -1,0 +1,32 @@
+centerTiles = {}
+
+local centerTilesBag_GUID = '478ccc'
+local centerTilesScriptingZone_GUID = '4b43f2'
+
+function centerTiles.setup(noPlayers)
+  for i = 1, 4 do
+    local rotY = (math.random(6) - 1) * 60
+    getObjectFromGUID(centerTilesBag_GUID).takeObject({
+      position          = {0.05, 0.76 + 0.2 * i, -0.19},
+      rotation          = {0, rotY, 0},
+      -- items in bag are indexed in reverse order, so first item has index 11, last has 0
+      -- and of course, index decreases on each takeObject
+      index             = 12 - i - (noPlayers - 2) * 4
+    }).setLock(true)
+  end
+end
+
+function centerTiles.getPlaced()
+  return gmtools.getObjectsFromZone(centerTilesScriptingZone_GUID, {type = 'centerTile'})
+end
+
+function centerTiles.nextRound()
+  local centerTiles = centerTiles.getPlaced()
+  local topCenterTile = centerTiles[1]
+  for i = 2, #centerTiles do
+    if topCenterTile.getPosition().y < centerTiles[i].getPosition().y then
+      topCenterTile = centerTiles[i]
+    end
+  end
+  getObjectFromGUID(centerTilesBag_GUID).putObject(topCenterTile)
+end

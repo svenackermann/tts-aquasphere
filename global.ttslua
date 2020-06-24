@@ -3,6 +3,7 @@
 #include <players>
 #include <headquarters>
 #include <board>
+#include <centerTiles>
 #include <turns>
 
 function onLoad()
@@ -93,7 +94,8 @@ end
 
 function setupGame(thePlayers)
   math.randomseed(os.time())
-  local sectors = board.setup(#thePlayers)
+  local sectors = board.setup()
+  centerTiles.setup(#thePlayers)
 
   local colors = players.setup(thePlayers, sectors)
   turns.setup(colors)
@@ -113,6 +115,7 @@ function nextRound(obj, color)
   end
 
   board.nextRound()
+  centerTiles.nextRound()
   headquarters.nextRound(currentRound + 1)
 
   if currentRound >= 3 then
@@ -122,7 +125,7 @@ function nextRound(obj, color)
 end
 
 function getCurrentRound()
-  local centerTiles = board.getPlacedCenterTiles()
+  local centerTiles = centerTiles.getPlaced()
   if #centerTiles == 0 then
     return 0
   else

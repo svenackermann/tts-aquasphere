@@ -18,8 +18,6 @@ local sectorPositions = {
   {-8.51, 1.06, 4.74}
 }
 
-local centerTilesBag_GUID = '478ccc'
-local centerTilesScriptingZone_GUID = '4b43f2'
 local labExpansionsBag_GUID = '38554f'
 local researchCardsStack_GUID = 'b9d782'
 local octopodsBag_GUID = '612de1'
@@ -94,19 +92,6 @@ local function shuffleSectors()
   return guids, sectorKeys
 end
 
-local function setupCenterTiles(noPlayers)
-  for i = 1, 4 do
-    local rotY = (math.random(6) - 1) * 60
-    getObjectFromGUID(centerTilesBag_GUID).takeObject({
-      position          = {0.05, 0.76 + 0.2 * i, -0.19},
-      rotation          = {0, rotY, 0},
-      -- items in bag are indexed in reverse order, so first item has index 11, last has 0
-      -- and of course, index decreases on each takeObject
-      index             = 12 - i - (noPlayers - 2) * 4
-    }).setLock(true)
-  end
-end
-
 local function dealResearchCards()
   local researchCardsStack = getObjectFromGUID(researchCardsStack_GUID)
   for i, researchCardPosition in ipairs(researchCardPositions) do
@@ -125,21 +110,6 @@ local function dealLabExpansions()
       rotation = {0, i * 60 + 4, 0}
     })
   end
-end
-
-function board.getPlacedCenterTiles()
-  return gmtools.getObjectsFromZone(centerTilesScriptingZone_GUID, {type = 'centerTile'})
-end
-
-local function discardTopCenterTile()
-  local centerTiles = board.getPlacedCenterTiles()
-  local topCenterTile = centerTiles[1]
-  for i = 2, #centerTiles do
-    if topCenterTile.getPosition().y < centerTiles[i].getPosition().y then
-      topCenterTile = centerTiles[i]
-    end
-  end
-  getObjectFromGUID(centerTilesBag_GUID).putObject(topCenterTile)
 end
 
 local function placeTokensInZone(sectorIndex, count, bag_GUID, zoneId)
@@ -194,7 +164,7 @@ function board.placeSubmarine(sectorIndex, submarine)
   end
 end
 
-function board.setup(noPlayers)
+function board.setup()
   local sectors_GUIDs, sectorKeys = shuffleSectors()
   for i, sector_GUID in ipairs(sectors_GUIDs) do
     local sector = getObjectFromGUID(sector_GUID)
@@ -206,13 +176,11 @@ function board.setup(noPlayers)
   getObjectFromGUID(researchCardsStack_GUID).shuffle()
   dealResearchCards()
   dealLabExpansions()
-  setupCenterTiles(noPlayers)
 
   return sectorKeys
 end
 
 function board.nextRound()
-  discardTopCenterTile()
   dealResearchCards()
   dealLabExpansions()
 end
