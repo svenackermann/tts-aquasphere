@@ -146,6 +146,7 @@ local function tryPlaceSubmarine(sectorIndex, submarine)
       local zone = getObjectFromGUID(zone_GUID)
       submarine.setPositionSmooth(zone.getPosition(), false)
       submarine.setRotationSmooth(zone.getRotation(), false)
+      submarine.setLock(true)
       return true
     else
       if subsInZone[1].getColorTint() == submarine.getColorTint() then

@@ -146,15 +146,15 @@ function players.setup(thePlayers, sectors)
 
   local sectorsOrder = {}
   for i, v in ipairs(sectors) do
-     sectorsOrder[v] = i
+    sectorsOrder[v] = i
   end
 
   local shuffledPlayers = shufflePlayers(thePlayers)
   for i, color in ipairs(shuffledPlayers) do
     local player = players[color]
     local baseLab = baseLabsBag.takeObject({
-      position          = player.baseLabPos,
-      rotation          = {0, player.rotY, 0}
+      position = player.baseLabPos,
+      rotation = {0, player.rotY, 0}
     })
     baseLab.setLock(true)
 
