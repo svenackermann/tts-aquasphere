@@ -10,19 +10,6 @@ function turns.setup(colors)
     Turns.order = colors
     Turns.turn_color = colors[1]
     Turns.enable = true
-  else
-    showNextRoundButton()
-  end
-end
-
--- global
-function onLoad()
-  local currentRound = getCurrentRound()
-  if currentRound == 0 then
-    showStartButton()
-  elseif currentRound < 4 and headquarters.roundEndReached() then
-    --TODO single player always needs the button
-    showNextRoundButton()
   end
 end
 
@@ -39,9 +26,6 @@ function onPlayerTurnEnd()
 
   if noPlayers == #passedPlayers then
     pause()
-    if currentRound < 4 then
-      showNextRoundButton()
-    end
     broadcastToAll(msg.intermediateValuation, Color.Green)
   elseif #passedPlayers + #order > noPlayers then
     for i, passedPlayer in ipairs(passedPlayers) do

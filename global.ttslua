@@ -5,6 +5,15 @@
 #include <board>
 #include <turns>
 
+function onLoad()
+  local currentRound = getCurrentRound()
+  if currentRound == 0 then
+    showStartButton()
+  elseif currentRound < 4 then
+    showNextRoundButton()
+  end
+end
+
 setup3PlayersCard_GUID = 'a8734f'
 function showStartButton()
   local card = getObjectFromGUID(setup3PlayersCard_GUID)
@@ -76,14 +85,13 @@ end
 function setupGameSeatedPlayers(obj, color)
   local seatedPlayers = getSeatedPlayers()
   if #seatedPlayers < 2 then
-    broadcastToColor(msg.atLeast2Players, color, {0.856, 0.1, 0.094})
+    broadcastToColor(msg.atLeast2Players, color, Color.Red)
   else
     setupGame(seatedPlayers)
   end
 end
 
 function setupGame(thePlayers)
-  hideButtons()
   math.randomseed(os.time())
   local sectors = board.setup(#thePlayers)
 
@@ -91,19 +99,25 @@ function setupGame(thePlayers)
   turns.setup(colors)
   headquarters.setup(colors)
   msg.broadcastStartPlayer(colors[1])
+  showNextRoundButton()
 end
 
-function nextRound()
+function nextRound(obj, color)
   local currentRound = getCurrentRound()
-  if currentRound >= 3 or #getSeatedPlayers() > 1 then
-    hideButtons()
-  end
   if currentRound >= 4 then
     return
   end
+  if not headquarters.roundEndReached() then
+    broadcastToColor(msg.roundNotEnded, color, Color.Red)
+    return
+  end
+
   board.nextRound()
   headquarters.nextRound(currentRound + 1)
 
+  if currentRound >= 3 then
+    hideButtons()
+  end
   -- TODO clean board
 end
 

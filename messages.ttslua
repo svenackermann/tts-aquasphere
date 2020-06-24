@@ -11,6 +11,7 @@ msg = {
     Yellow = 'Gelb'
   },
   atLeast2Players = 'Geht nur bei mindestens zwei anwesenden Spielern',
+  roundNotEnded = 'Es haben noch nicht alle Spieler die Runde beendet.',
   startPlayer = 'Ausgeloster Startspieler: %s',
   intermediateValuation = 'Zeit für die Zwischenwertung',
   playerEndRound = 'Spieler %s hat die Runde beendet.'
