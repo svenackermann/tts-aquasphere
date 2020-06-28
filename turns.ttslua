@@ -15,27 +15,33 @@ end
 
 -- global
 function onPlayerTurnEnd()
-  local currentRound = rounds.getCurrent()
-  if currentRound == 0 then
+  local activePlayers = headquarters.getActivePlayers()
+  if #activePlayers == 0 then
     -- not set up yet
     return
   end
-  local order = Turns.order
   local passedPlayers = headquarters.getPassedPlayers()
-  local noPlayers = #headquarters.getActivePlayers()
 
-  if noPlayers == #passedPlayers then
+  if #activePlayers == #passedPlayers then
     pause()
     broadcastToAll(msg.intermediateValuation, Color.Green)
-  elseif #passedPlayers + #order > noPlayers then
-    for i, passedPlayer in ipairs(passedPlayers) do
-      for j, color in ipairs(order) do
-        if passedPlayer == color then
-          table.remove(order, j)
-          msg.broadcastPlayerRoundEnd(color)
-        end
+  else
+    local passed = {}
+    for _, passedPlayer in ipairs(passedPlayers) do
+      passed[passedPlayer] = 1
+    end
+    local curOrder = {}
+    for _, pl in ipairs(Turns.order) do
+      curOrder[pl] = 1
+    end
+    local newOrder = {}
+    for _, activePlayer in ipairs(activePlayers) do
+      if not passed[activePlayer] then
+        table.insert(newOrder, activePlayer)
+      elseif curOrder[activePlayer] then
+        msg.broadcastPlayerRoundEnd(activePlayer)
       end
     end
-    Turns.order = order
+    Turns.order = newOrder
   end
 end
