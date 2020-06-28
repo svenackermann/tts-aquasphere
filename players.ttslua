@@ -9,7 +9,8 @@ players = {
     engineer_GUID = '6c48a0',
     orderBot_GUID = '93cf49',
     countMarker_GUID = 'f362b3',
-    pointsMarker_GUID = 'c2e284'
+    pointsMarker_GUID = 'c2e284',
+    timeZone_GUID = 'b49c0d'
   },
   White = {
     baseLabPos = {21.57, 1.06, -18.94},
@@ -21,7 +22,8 @@ players = {
     engineer_GUID = 'dce324',
     orderBot_GUID = 'b41cd6',
     countMarker_GUID = '416d17',
-    pointsMarker_GUID = 'a78c23'
+    pointsMarker_GUID = 'a78c23',
+    timeZone_GUID = 'a5ad52'
   },
   Blue = {
     baseLabPos = {-21.84, 1.06, -19.08},
@@ -33,7 +35,8 @@ players = {
     engineer_GUID = 'decf71',
     orderBot_GUID = '1551b8',
     countMarker_GUID = 'ef58a9',
-    pointsMarker_GUID = 'd6a886'
+    pointsMarker_GUID = 'd6a886',
+    timeZone_GUID = '7997ff'
   },
   Yellow = {
     baseLabPos = {-21.64, 1.06, 18.91},
@@ -45,7 +48,8 @@ players = {
     engineer_GUID = '4e9fd3',
     orderBot_GUID = '0420ec',
     countMarker_GUID = '733077',
-    pointsMarker_GUID = '34aa8d'
+    pointsMarker_GUID = '34aa8d',
+    timeZone_GUID = '3daecd'
   }
 }
 
@@ -148,6 +152,30 @@ local function setupRemainingSectors(baseLabsBag, sectorsOrder)
   end
 end
 
+local function assignTime(player, amount)
+  --TODO check capacity
+  local timeZone = getObjectFromGUID(player.timeZone_GUID)
+  local pos = timeZone.getPosition()
+  pos.y = 3
+  local bag = getObjectFromGUID(timeBag_GUID)
+  for i = 1, amount do
+    bag.takeObject({
+      position = pos,
+      rotation = timeZone.getRotation()
+    })
+    pos.y = pos.y + 0.5
+  end
+end
+
+local function assignStartTime(player, sectorIndex, sectors)
+  local prevSector = (sectorIndex - 2) % 6 + 1
+  local amount = 4
+  if sectors[sectorIndex] == 'F' or sectors[prevSector] == 'F' then
+    amount = 3
+  end
+  assignTime(player, amount)
+end
+
 function players.setup(thePlayers, sectors)
   local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
   baseLabsBag.shuffle()
@@ -175,8 +203,7 @@ function players.setup(thePlayers, sectors)
     board.placeTime(sectorIndex, 4)
     local submarine = getObjectFromGUID(player.initSubmarine_GUID)
     board.placeSubmarine(sectorIndex, submarine)
-
-    --TODO give time to players
+    assignStartTime(player, sectorIndex, sectors)
   end
 
   setupRemainingSectors(baseLabsBag, sectorsOrder)

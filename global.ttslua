@@ -1,3 +1,5 @@
+timeBag_GUID = 'ec8424'
+
 #include <messages>
 #include <utils/gmNotesTools>
 #include <players>

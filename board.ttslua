@@ -22,7 +22,6 @@ local labExpansionsBag_GUID = '38554f'
 local researchCardsStack_GUID = 'b9d782'
 local octopodsBag_GUID = '612de1'
 local crystalsBag_GUID = 'e3cb69'
-local timeBag_GUID = 'ec8424'
 
 local researchCardPositions = {
   {3.40, 2, 17.62},
