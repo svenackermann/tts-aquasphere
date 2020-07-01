@@ -54,7 +54,6 @@ players = {
 }
 
 local baseLabsBag_GUID = '173592'
-local greySubmarinesBag_GUID = '5234d5'
 local greyBotsBag_GUID = 'c2a84e'
 
 local botActionOrder = {

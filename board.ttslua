@@ -143,30 +143,52 @@ function board.placeTime(sectorIndex, count)
   placeTokensInZone(sectorIndex, count, timeBag_GUID, 'time')
 end
 
+function board.removeTime(sectorIndex)
+  local times = gmtools.getObjectsFromZone(sectorZones[sectorIndex].time, {type = 'time'})
+  for _, time in ipairs(times) do
+    time.destruct()
+  end
+end
+
 local function tryPlaceSubmarine(sectorIndex, submarine)
   local zones = sectorZones[sectorIndex].submarines
+  local color = gmtools.parse(submarine).color
+  -- in 2 player mode we have 2 neutral colors, but here both are Grey
+  local anotherAllowed = color == 'Grey' and playerCount == 2
   for i, zone_GUID in ipairs(zones) do
     local subsInZone = gmtools.getObjectsFromZone(zone_GUID, {type = 'submarine'})
     if #subsInZone == 0 then
       local zone = getObjectFromGUID(zone_GUID)
-      submarine.setPositionSmooth(zone.getPosition(), false)
+      local pos = zone.getPosition()
+      pos.y = 1.14
+      submarine.setPositionSmooth(pos, false)
       submarine.setRotationSmooth(zone.getRotation(), false)
       submarine.setLock(true)
       return true
     else
-      if subsInZone[1].getColorTint() == submarine.getColorTint() then
-        return false
+      local inZoneColor = gmtools.parse(subsInZone[1]).color
+      if inZoneColor == color then
+        if anotherAllowed then
+          anotherAllowed = false
+        else
+          return false
+        end
       end
     end
   end
   return false
 end
 
-function board.placeSubmarine(sectorIndex, submarine)
+function board.placeSubmarine(sectorIndex, submarine, callback)
   local placed = false
-  while not placed do
-    placed = tryPlaceSubmarine(sectorIndex, submarine)
-    sectorIndex = (sectorIndex % 6) + 1
+  local nextIndex = sectorIndex
+  repeat
+    placed = tryPlaceSubmarine(nextIndex, submarine)
+    nextIndex = (nextIndex % 6) + 1
+  until placed or nextIndex == sectorIndex
+  if placed and callback ~= nil then
+    local moved = function() return not submarine.isSmoothMoving() end
+    Wait.condition(callback, moved)
   end
 end
 

@@ -105,6 +105,34 @@ function centerTiles.getPlaced()
   return gmtools.getObjectsFromZone(centerTilesScriptingZone_GUID, {type = 'centerTile'})
 end
 
+local function placeSubmarines(submarineSectors)
+  if #submarineSectors > 0 then
+    local submarinesBag = getObjectFromGUID(greySubmarinesBag_GUID)
+    local sectorIndex = table.remove(submarineSectors)
+    local submarine = submarinesBag.takeObject({smooth = false})
+    board.placeSubmarine(sectorIndex, submarine, function() placeSubmarines(submarineSectors) end)
+  end
+end
+
+local function applyCenterTile(tile)
+  local tileType = gmtools.parse(tile)
+  local tileConfig = tilesConfigs[tileType.players][tileType.round]
+  local rot = math.floor((tile.getRotation().y + 1) / 60)
+  local submarineSectors = {}
+  for i = 1, 6 do
+    local sectorIndex = ((i - 1 + rot) % 6) + 1
+    local sectorConfig = tileConfig[i]
+    board.removeTime(sectorIndex)
+    board.placeTime(sectorIndex, sectorConfig[1])
+    board.placeCrystals(sectorIndex, sectorConfig[2])
+    board.placeOctopods(sectorIndex, sectorConfig[3])
+    if sectorConfig[4] > 0 then
+      table.insert(submarineSectors, sectorIndex)
+    end
+  end
+  placeSubmarines(submarineSectors)
+end
+
 function centerTiles.nextRound()
   local centerTiles = centerTiles.getPlaced()
   local topCenterTile = centerTiles[1]
@@ -113,5 +141,6 @@ function centerTiles.nextRound()
       topCenterTile = centerTiles[i]
     end
   end
+  applyCenterTile(topCenterTile)
   getObjectFromGUID(centerTilesBag_GUID).putObject(topCenterTile)
 end
