@@ -150,7 +150,7 @@ function board.removeTime(sectorIndex)
   end
 end
 
-local function tryPlaceSubmarine(sectorIndex, submarine)
+local function findZoneForSubmarine(sectorIndex, submarine, zoneSubs)
   local zones = sectorZones[sectorIndex].submarines
   local color = gmtools.parse(submarine).color
   -- in 2 player mode we have 2 neutral colors, but here both are Grey
@@ -158,12 +158,7 @@ local function tryPlaceSubmarine(sectorIndex, submarine)
   for i, zone_GUID in ipairs(zones) do
     local subsInZone = gmtools.getObjectsFromZone(zone_GUID, {type = 'submarine'})
     if #subsInZone == 0 then
-      local zone = getObjectFromGUID(zone_GUID)
-      local pos = zone.getPosition()
-      pos.y = 1.14
-      submarine.setPositionSmooth(pos, false)
-      submarine.setRotationSmooth(zone.getRotation(), false)
-      submarine.setLock(true)
+      zoneSubs[zone_GUID] = submarine
       return true
     else
       local inZoneColor = gmtools.parse(subsInZone[1]).color
@@ -179,16 +174,24 @@ local function tryPlaceSubmarine(sectorIndex, submarine)
   return false
 end
 
-function board.placeSubmarine(sectorIndex, submarine, callback)
-  local placed = false
-  local nextIndex = sectorIndex
-  repeat
-    placed = tryPlaceSubmarine(nextIndex, submarine)
-    nextIndex = (nextIndex % 6) + 1
-  until placed or nextIndex == sectorIndex
-  if placed and callback ~= nil then
-    local moved = function() return not submarine.isSmoothMoving() end
-    Wait.condition(callback, moved)
+function board.placeSubmarines(sectorIndices, submarines)
+  local zoneSubs = {}
+  for i, sectorIndex in ipairs(sectorIndices) do
+    local found = false
+    local nextIndex = sectorIndex
+    local submarine = submarines[i]
+    repeat
+      found = findZoneForSubmarine(nextIndex, submarine, zoneSubs)
+      nextIndex = (nextIndex % 6) + 1
+    until found or nextIndex == sectorIndex
+  end
+  for zone_GUID, submarine in pairs(zoneSubs) do
+    local zone = getObjectFromGUID(zone_GUID)
+    local pos = zone.getPosition()
+    pos.y = 1.14
+    submarine.setPositionSmooth(pos, false)
+    submarine.setRotationSmooth(zone.getRotation(), false)
+    submarine.setLock(true)
   end
 end
 

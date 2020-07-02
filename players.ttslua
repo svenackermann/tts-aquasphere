@@ -118,7 +118,7 @@ local function placeGreyBot(sectorIndex, remainingBaseLabs)
   end
 end
 
-local function setupRemainingSectors(baseLabsBag, sectorsOrder)
+local function setupRemainingSectors(baseLabsBag, sectorsOrder, sectorIndices, submarines)
   local remainingBaseLabs = baseLabsBag.getObjects()
   local size = #remainingBaseLabs
 
@@ -137,16 +137,16 @@ local function setupRemainingSectors(baseLabsBag, sectorsOrder)
   if size > 2 then
     nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 2].gm_notes).letter
     sectorIndex = sectorsOrder[nextLetter]
+    placeGreyBot(sectorIndex, size)
 
     local greySubmarinesBag = getObjectFromGUID(greySubmarinesBag_GUID)
-    local submarine = greySubmarinesBag.takeObject({smooth = false})
-    board.placeSubmarine(sectorIndex, submarine)
-    placeGreyBot(sectorIndex, size)
+    table.insert(sectorIndices, sectorIndex)
+    table.insert(submarines, greySubmarinesBag.takeObject({smooth = false}))
+
     if size > 3 then
       nextLetter = gmtools.parseGmNotes(remainingBaseLabs[size - 3].gm_notes).letter
-      sectorIndex = sectorsOrder[nextLetter]
-      submarine = greySubmarinesBag.takeObject({smooth = false})
-      board.placeSubmarine(sectorIndex, submarine)
+      table.insert(sectorIndices, sectorsOrder[nextLetter])
+      table.insert(submarines, greySubmarinesBag.takeObject({smooth = false}))
     end
   end
 end
@@ -185,6 +185,8 @@ function players.setup(thePlayers, sectors)
   end
 
   local shuffledPlayers = shufflePlayers(thePlayers)
+  local sectorIndices = {}
+  local submarines = {}
   for i, color in ipairs(shuffledPlayers) do
     local player = players[color]
     local baseLab = baseLabsBag.takeObject({
@@ -200,12 +202,13 @@ function players.setup(thePlayers, sectors)
     board.placeOctopods(sectorIndex, 1)
     board.placeCrystals(sectorIndex, 1)
     board.placeTime(sectorIndex, 4)
-    local submarine = getObjectFromGUID(player.initSubmarine_GUID)
-    board.placeSubmarine(sectorIndex, submarine)
+    sectorIndices[i] = sectorIndex
+    submarines[i] = getObjectFromGUID(player.initSubmarine_GUID)
     assignStartTime(player, sectorIndex, sectors)
   end
 
-  setupRemainingSectors(baseLabsBag, sectorsOrder)
+  setupRemainingSectors(baseLabsBag, sectorsOrder, sectorIndices, submarines)
+  board.placeSubmarines(sectorIndices, submarines)
 
   return shuffledPlayers
 end

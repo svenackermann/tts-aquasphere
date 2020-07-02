@@ -106,12 +106,12 @@ function centerTiles.getPlaced()
 end
 
 local function placeSubmarines(submarineSectors)
-  if #submarineSectors > 0 then
-    local submarinesBag = getObjectFromGUID(greySubmarinesBag_GUID)
-    local sectorIndex = table.remove(submarineSectors)
-    local submarine = submarinesBag.takeObject({smooth = false})
-    board.placeSubmarine(sectorIndex, submarine, function() placeSubmarines(submarineSectors) end)
+  local submarinesBag = getObjectFromGUID(greySubmarinesBag_GUID)
+  local submarines = {}
+  for i = 1, #submarineSectors do
+    submarines[i] = submarinesBag.takeObject({smooth = false})
   end
+  board.placeSubmarines(submarineSectors, submarines)
 end
 
 local function applyCenterTile(tile)

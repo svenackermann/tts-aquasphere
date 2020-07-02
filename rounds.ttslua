@@ -24,7 +24,6 @@ function rounds.next()
   if currentRound >= 3 then
     hideButtons()
   end
-  -- TODO clean board
 end
 
 function rounds.getCurrent()
