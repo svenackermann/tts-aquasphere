@@ -1,7 +1,5 @@
 players = {
   Red = {
-    baseLabPos = {21.97, 1.06, 18.95},
-    rotY = 0,
     scientist_GUID = 'c3f106',
     initBot_GUID = '7093d9',
     initSubmarine_GUID = 'f322bd',
@@ -11,11 +9,10 @@ players = {
     countMarker_GUID = 'f362b3',
     pointsMarker_GUID = 'c2e284',
     timeZone_GUID = 'b49c0d',
-    timeProgramZone_GUI = 'e42f7a'
+    timeProgramZone_GUID = 'e42f7a',
+    labZone_GUID = '6d4e6f'
   },
   White = {
-    baseLabPos = {21.57, 1.06, -18.94},
-    rotY = 180,
     scientist_GUID = 'b8c84b',
     initBot_GUID = '5d7798',
     initSubmarine_GUID = 'e9e19f',
@@ -25,11 +22,10 @@ players = {
     countMarker_GUID = '416d17',
     pointsMarker_GUID = 'a78c23',
     timeZone_GUID = 'a5ad52',
-    timeProgramZone_GUI = '4ce16d'
+    timeProgramZone_GUID = '4ce16d',
+    labZone_GUID = 'b1c7d7'
   },
   Blue = {
-    baseLabPos = {-21.84, 1.06, -19.08},
-    rotY = 180,
     scientist_GUID = '1b9eb6',
     initBot_GUID = '0b1fba',
     initSubmarine_GUID = 'ff537d',
@@ -39,11 +35,10 @@ players = {
     countMarker_GUID = 'ef58a9',
     pointsMarker_GUID = 'd6a886',
     timeZone_GUID = '7997ff',
-    timeProgramZone_GUI = '1e34c4'
+    timeProgramZone_GUID = '1e34c4',
+    labZone_GUID = '593d4b'
   },
   Yellow = {
-    baseLabPos = {-21.64, 1.06, 18.91},
-    rotY = 0,
     scientist_GUID = '3f9686',
     initBot_GUID = 'ce340c',
     initSubmarine_GUID = 'bea65d',
@@ -53,7 +48,8 @@ players = {
     countMarker_GUID = '733077',
     pointsMarker_GUID = '34aa8d',
     timeZone_GUID = '3daecd',
-    timeProgramZone_GUI = 'f52aed'
+    timeProgramZone_GUID = 'f52aed',
+    labZone_GUID = '786fca'
   }
 }
 
@@ -88,14 +84,14 @@ local boardScientistPos = {
   {-11.59, 1.83, 6.46}
 }
 
-local function placeInitBotAndScientist(player, baseLabLetter, sectorIndex)
+local function placeInitBotAndScientist(player, baseLabLetter, sectorIndex, rotY)
   local action = boardSectorBotActions[baseLabLetter]
   local deltaX = (botActionOrder[action] - 1) * 1.5
-  if player.rotY == 0 then
+  if rotY == 0 then
     deltaX = -deltaX
   end
-  local initBotPos = player.labBotPos
-  initBotPos[1] = initBotPos[1] + deltaX
+  local initBotPos = Vector(player.labBotPos)
+  initBotPos.x = initBotPos.x + deltaX
   getObjectFromGUID(player.initBot_GUID).setPositionSmooth(initBotPos, false)
 
   local scientistPos = boardScientistPos[sectorIndex]
@@ -193,16 +189,20 @@ function players.setup(thePlayers, sectors)
   local submarines = {}
   for i, color in ipairs(shuffledPlayers) do
     local player = players[color]
+    local labZone = getObjectFromGUID(player.labZone_GUID)
+    local labPos = labZone.getPosition()
+    local labRot = labZone.getRotation()
+    labPos.y = 1.06
     local baseLab = baseLabsBag.takeObject({
-      position = player.baseLabPos,
-      rotation = {0, player.rotY, 0}
+      position = labPos,
+      rotation = labRot
     })
     baseLab.setLock(true)
 
     local baseLabLetter = gmtools.parse(baseLab).letter
     local sectorIndex = sectorsOrder[baseLabLetter]
 
-    placeInitBotAndScientist(player, baseLabLetter, sectorIndex)
+    placeInitBotAndScientist(player, baseLabLetter, sectorIndex, labRot.y)
     board.placeOctopods(sectorIndex, 1)
     board.placeCrystals(sectorIndex, 1)
     board.placeTime(sectorIndex, 4)
@@ -219,7 +219,7 @@ end
 
 function players.nextRound()
   for _, player in pairs(players) do
-    local times = gmtools.getObjectsFromZone(player.timeProgramZone_GUI, {type = 'time'})
+    local times = gmtools.getObjectsFromZone(player.timeProgramZone_GUID, {type = 'time'})
     for _, time in ipairs(times) do
       time.destruct()
     end
