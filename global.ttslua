@@ -5,6 +5,7 @@ playerCount = 0
 #include <messages>
 #include <utils/gmNotesTools>
 #include <players>
+#include <labs>
 #include <headquarters>
 #include <board>
 #include <centerTiles>

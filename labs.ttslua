@@ -1,0 +1,61 @@
+labs = {}
+
+local baseLabsBag_GUID = '173592'
+
+function labs.setup()
+  local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
+  baseLabsBag.shuffle()
+
+  local letters = {}
+  local baseLabs = baseLabsBag.getObjects()
+  for _, baseLab in ipairs(baseLabs) do
+    local letter = gmtools.parseGmNotes(baseLab.gm_notes).letter
+    table.insert(letters, 1, letter)
+  end
+  return letters
+end
+
+function labs.placeBaseLab(player)
+  local labZone = getObjectFromGUID(player.labZone_GUID)
+  local labPos = labZone.getPosition()
+  local labRot = labZone.getRotation()
+  labPos.y = 1.06
+  local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
+  local baseLab = baseLabsBag.takeObject({
+    position = labPos,
+    rotation = labRot
+  })
+  baseLab.setLock(true)
+  return baseLab
+end
+
+function labs.getCapacities(player)
+  local baseLabs = gmtools.getObjectsFromZone(player.labZone_GUID, {type = 'baseLab'})
+  local capacities = {
+    time = 0,
+    crystal = 0,
+    research = 0,
+    octopod = 0,
+    A = 0,
+    B = 0,
+    C = 0,
+    D = 0,
+    E = 0,
+    F = 0
+  }
+  if #baseLabs > 0 then
+    capacities.time = 2
+    capacities.crystal = 2
+    capacities.research = 2
+    capacities.octopod = 2
+    capacities[gmtools.parse(baseLabs[1]).letter] = 1
+    local labExps = gmtools.getObjectsFromZone(player.labZone_GUID, {type = 'labExp'})
+    for _, labExp in ipairs(labExps) do
+      local value = gmtools.parse(labExp)
+      capacities[value.l] = capacities[value.l] + 1
+      capacities[value.r] = capacities[value.r] + 1
+    end
+  end
+  capacities.time = capacities.time * 2
+  return capacities
+end
