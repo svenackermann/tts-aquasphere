@@ -3,87 +3,123 @@ scoring = {}
 local scoringScheme = {1, 3, 6, 10, 15, 21}
 scoringScheme[0] = 0
 
-local function scoreControlSpaces(score, controlColors)
-  local botsPerPlayer = {Red = 0, White = 0, Blue = 0, Yellow = 0}
-  for _, color in ipairs(controlColors) do
-    if score[color] then
-      botsPerPlayer[color] = botsPerPlayer[color] + 1
-    end
-  end
+local function scoreControlSpaces(controlSectors)
   local playerList = {}
-  for color, bots in pairs(botsPerPlayer) do
-    table.insert(playerList, {color = color, bots = bots})
+  for color, sectors in pairs(controlSectors) do
+    table.insert(playerList, {color = color, bots = #sectors})
   end
   table.sort(playerList, function(a, b)
     return a.bots > b.bots
   end)
-  local firstBots = playerList[1].bots
-  if firstBots > playerList[2].bots then
-    score[playerList[1].color].control = 6
-  elseif firstBots > 0 then
-    local i = 1
-    while firstBots == playerList[i].bots and i <= #playerList do
-      score[playerList[i].color].control = 3
-      i = i + 1
+
+  local points = 6
+  local mostBots = playerList[1].bots
+  if mostBots == playerList[2].bots then
+    points = 3
+  end
+  local score = {}
+  for _, player in ipairs(playerList) do
+    if player.bots == mostBots then
+      score[player.color] = points
+    else
+      score[player.color] = 0
     end
   end
+  return score
 end
 
-local function scoreBots(color)
-  local placedSubs = players.countPlacedSubmarines(color)
+local function scoreBots(player)
+  local placedSubs = players.countPlacedSubmarines(player)
   if placedSubs == 0 then
     return 0
   end
   local maxScore = placedSubs * 2 + 2
-  local placedBots = players.countPlacedBots(color)
+  local placedBots = players.countPlacedBots(player)
   return math.min(maxScore, placedBots)
 end
 
-local function scoreCrystals(color)
-  local crystals = players.getCrystals(color)
+local function getPlayerControlSectors()
+  local controlBots = board.getControlBots()
+  local controlSectors = {Red = {}, White = {}, Blue = {}, Yellow = {}}
+  for sectorIndex, bot in ipairs(controlBots) do
+    if bot then
+      table.insert(controlSectors[gmtools.parse(bot).color], sectorIndex)
+    end
+  end
+  return controlSectors
+end
+
+local function scoreCrystals(player)
+  local crystals = players.getCrystals(player)
   crystals = math.min(crystals, #scoringScheme)
   return scoringScheme[crystals]
 end
 
-local function scoreOctopods(score, controlColors)
-  for sectorIndex, color in pairs(controlColors) do
-    if score[color] then
+local function scoreOctopods(controlSectors)
+  local score = 0
+  for sectorIndex in ipairs(controlSectors) do
       local octopods = board.countOctopods(sectorIndex)
       octopods = math.min(octopods, #scoringScheme)
-      score[color].octopods = score[color].octopods - scoringScheme[octopods]
-    end
+      score = score - scoringScheme[octopods]
   end
+  return score
 end
 
 function scoring.intermediate()
   local score = {}
+  local controlSectors = getPlayerControlSectors()
+  local controlScore = scoreControlSpaces(controlSectors)
   for _, color in ipairs(headquarters.getActivePlayers()) do
-    score[color] = {
-      control = 0,
-      bots = 0,
-      crystals = 0,
-      octopods = 0
+    local player = players[color]
+    local v = {
+      control = controlScore[color],
+      bots = scoreBots(player),
+      crystals = scoreCrystals(player),
+      octopods = scoreOctopods(controlSectors[color])
     }
+    v.total = v.control + v.bots + v.crystals + v.octopods
+    score[color] = v
   end
+  return score
+end
 
-  local controlBots = board.getControlBots()
-  local controlColors = {}
-  for i, bot in ipairs(controlBots) do
-    if bot then
-      controlColors[i] = gmtools.parse(bot).color
-    else
-      controlColors[i] = false
+local function scoreLetters(player)
+  local capacities = labs.getCapacities(player)
+  local uniqueLetters = 0
+  for _, letter in ipairs({'A', 'B', 'C', 'D', 'E', 'F'}) do
+    if capacities[letter] > 0 then
+      uniqueLetters = uniqueLetters + 1
     end
   end
-  scoreControlSpaces(score, controlColors)
-  for color, cScore in pairs(score) do
-    cScore.bots = scoreBots(color)
-    cScore.crystals = scoreCrystals(color)
-  end
-  scoreOctopods(score, controlColors)
+  return scoringScheme[uniqueLetters]
+end
 
-  for _, v in pairs(score) do
-    v.total = v.control + v.bots + v.crystals + v.octopods
+local function scoreSubmarines(player)
+  if players.countPlacedSubmarines(player) == 6 then
+    return 5
+  end
+  return 0
+end
+
+local function scoreCompletedLab(player)
+  if labs.countExpansions(player) == 5 then
+    return 5
+  end
+  return 0
+end
+
+function scoring.final()
+  local score = {}
+  for _, color in ipairs(headquarters.getActivePlayers()) do
+    local player = players[color]
+    local v = {
+      letters = scoreLetters(player),
+      time = players.getTime(player),
+      submarines = scoreSubmarines(player),
+      completedLab = scoreCompletedLab(player)
+    }
+    v.total = v.letters + v.time + v.submarines + v.completedLab
+    score[color] = v
   end
   return score
 end

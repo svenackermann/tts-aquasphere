@@ -227,14 +227,18 @@ function players.nextRound()
   end
 end
 
-function players.countPlacedSubmarines(color)
-  return 6 - #gmtools.getObjectsFromZone(players[color].botSubsSupplyZone_GUID, {type = 'submarine'})
+function players.countPlacedSubmarines(player)
+  return 6 - #gmtools.getObjectsFromZone(player.botSubsSupplyZone_GUID, {type = 'submarine'})
 end
 
-function players.countPlacedBots(color)
-  return 14 - #gmtools.getObjectsFromZone(players[color].botSubsSupplyZone_GUID, {type = 'bot'})
+function players.countPlacedBots(player)
+  return 14 - #gmtools.getObjectsFromZone(player.botSubsSupplyZone_GUID, {type = 'bot'})
 end
 
-function players.getCrystals(color)
-  return gmtools.countStackableObjectsInZone(players[color].crystalsZone_GUID, {type = 'crystal'})
+function players.getCrystals(player)
+  return gmtools.countStackableObjectsInZone(player.crystalsZone_GUID, {type = 'crystal'})
+end
+
+function players.getTime(player)
+  return gmtools.countStackableObjectsInZone(player.timeZone_GUID, {type = 'time'})
 end

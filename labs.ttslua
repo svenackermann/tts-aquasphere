@@ -59,3 +59,7 @@ function labs.getCapacities(player)
   capacities.time = capacities.time * 2
   return capacities
 end
+
+function labs.countExpansions(player)
+  return #gmtools.getObjectsFromZone(player.labZone_GUID, {type = 'labExp'})
+end
