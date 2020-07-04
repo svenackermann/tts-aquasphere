@@ -47,6 +47,7 @@ local sectorZones = {
     time = 'd86a80',
     octopod = 'd633eb',
     crystal = '7afdf8',
+    control = '702e31',
     loadingStations = {'5ff1d9'}
   },
   {
@@ -54,6 +55,7 @@ local sectorZones = {
     time = '8ed132',
     octopod = '0889ed',
     crystal = 'c9acd1',
+    control = 'ac69a7',
     loadingStations = {'a98469'}
   },
   {
@@ -61,6 +63,7 @@ local sectorZones = {
     time = '834906',
     octopod = 'e67669',
     crystal = '5f836a',
+    control = '57ab7e',
     loadingStations = {'5b78be'}
   },
   {
@@ -68,6 +71,7 @@ local sectorZones = {
     time = 'a4eff6',
     octopod = '73f7d9',
     crystal = '7db834',
+    control = '3b3c6d',
     loadingStations = {'7f898b'}
   },
   {
@@ -75,6 +79,7 @@ local sectorZones = {
     time = '975fae',
     octopod = 'a2141a',
     crystal = '8d4a78',
+    control = '5d10d4',
     loadingStations = {'881c87'}
   },
   {
@@ -82,6 +87,7 @@ local sectorZones = {
     time = '539938',
     octopod = '856985',
     crystal = '29812b',
+    control = '671044',
     loadingStations = {'741281'}
   }
 }

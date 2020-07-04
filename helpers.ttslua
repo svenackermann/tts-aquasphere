@@ -1,0 +1,27 @@
+--scripts to help with game setup, not included in the global script
+--can be executed by selecting what is needed and hitting Ctrl+Shift+2
+
+-- copy some object from sector 1 (middle bottom with 0 degree rotation) to the other sectors
+function copyToSectors(guid)
+  local sectorPositions = {
+    Vector({0.04, 1.06, 9.74}),
+    Vector({8.60, 1.06, 4.74}),
+    Vector({8.60, 1.06, -5.14}),
+    Vector({-0.03, 1.06, -10.08}),
+    Vector({-8.57, 1.06, -5.15}),
+    Vector({-8.51, 1.06, 4.74})
+  }
+  local obj = getObjectFromGUID(guid)
+  local pos = obj.getPosition()
+  local rot = obj.getRotation()
+  for i = 2, 6 do
+    rot.y = rot.y + 60
+    local cPos = pos - sectorPositions[1]
+    cPos:rotateOver('y', (i - 1) * 60)
+    cPos = cPos + sectorPositions[i]
+    local cloned = obj.clone()
+    cloned.setPosition(cPos)
+    cloned.setRotation(rot)
+  end
+end
+copyToSectors('702e31')
