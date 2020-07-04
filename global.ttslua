@@ -11,6 +11,7 @@ playerCount = 0
 #include <centerTiles>
 #include <turns>
 #include <rounds>
+#include <scoring>
 
 setup3PlayersCard_GUID = 'a8734f'
 function showStartButton()

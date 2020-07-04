@@ -14,7 +14,7 @@ function copyToSectors(guid)
   local obj = getObjectFromGUID(guid)
   local pos = obj.getPosition()
   local rot = obj.getRotation()
-  for i = 2, 6 do
+  for i = 2, #sectorPositions do
     rot.y = rot.y + 60
     local cPos = pos - sectorPositions[1]
     cPos:rotateOver('y', (i - 1) * 60)
@@ -25,3 +25,23 @@ function copyToSectors(guid)
   end
 end
 copyToSectors('702e31')
+
+-- copy some object from player Red's board to the others
+function copyToPlayers(guid)
+  local boards = {'3b7c6e', '07611e', '73a8fa', 'b317d9'}
+  local board1 = getObjectFromGUID(boards[1])
+
+  local obj = getObjectFromGUID(guid)
+  local pos = obj.getPosition()
+  local rot = obj.getRotation()
+  for i = 2, #boards do
+    local boardi = getObjectFromGUID(boards[i])
+    local cPos = pos - board1.getPosition()
+    cPos:rotateOver('y', boardi.getRotation().y - board1.getRotation().y)
+    cPos = cPos + boardi.getPosition()
+    local cloned = obj.clone()
+    cloned.setPosition(cPos)
+    cloned.setRotation(rot)
+  end
+end
+copyToPlayers('99a9c5')

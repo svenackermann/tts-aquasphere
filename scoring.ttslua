@@ -1,0 +1,89 @@
+scoring = {}
+
+local scoringScheme = {1, 3, 6, 10, 15, 21}
+scoringScheme[0] = 0
+
+local function scoreControlSpaces(score, controlColors)
+  local botsPerPlayer = {Red = 0, White = 0, Blue = 0, Yellow = 0}
+  for _, color in ipairs(controlColors) do
+    if score[color] then
+      botsPerPlayer[color] = botsPerPlayer[color] + 1
+    end
+  end
+  local playerList = {}
+  for color, bots in pairs(botsPerPlayer) do
+    table.insert(playerList, {color = color, bots = bots})
+  end
+  table.sort(playerList, function(a, b)
+    return a.bots > b.bots
+  end)
+  local firstBots = playerList[1].bots
+  if firstBots > playerList[2].bots then
+    score[playerList[1].color].control = 6
+  elseif firstBots > 0 then
+    local i = 1
+    while firstBots == playerList[i].bots and i <= #playerList do
+      score[playerList[i].color].control = 3
+      i = i + 1
+    end
+  end
+end
+
+local function scoreBots(color)
+  local placedSubs = players.countPlacedSubmarines(color)
+  if placedSubs == 0 then
+    return 0
+  end
+  local maxScore = placedSubs * 2 + 2
+  local placedBots = players.countPlacedBots(color)
+  return math.min(maxScore, placedBots)
+end
+
+local function scoreCrystals(color)
+  local crystals = players.getCrystals(color)
+  crystals = math.min(crystals, #scoringScheme)
+  return scoringScheme[crystals]
+end
+
+local function scoreOctopods(score, controlColors)
+  for sectorIndex, color in pairs(controlColors) do
+    if score[color] then
+      local octopods = board.countOctopods(sectorIndex)
+      octopods = math.min(octopods, #scoringScheme)
+      score[color].octopods = score[color].octopods - scoringScheme[octopods]
+    end
+  end
+end
+
+function scoring.intermediate()
+  local score = {}
+  for _, color in ipairs(headquarters.getActivePlayers()) do
+    score[color] = {
+      control = 0,
+      bots = 0,
+      crystals = 0,
+      octopods = 0
+    }
+  end
+
+  local controlBots = board.getControlBots()
+  local controlColors = {}
+  for i, bot in ipairs(controlBots) do
+    if bot then
+      controlColors[i] = gmtools.parse(bot).color
+    else
+      controlColors[i] = false
+    end
+  end
+  scoreControlSpaces(score, controlColors)
+  for color, cScore in pairs(score) do
+    cScore.bots = scoreBots(color)
+    cScore.crystals = scoreCrystals(color)
+  end
+  scoreOctopods(score, controlColors)
+
+  for _, v in pairs(score) do
+    v.total = v.control + v.bots + v.crystals + v.octopods
+  end
+  return score
+end

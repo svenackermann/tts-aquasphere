@@ -211,6 +211,24 @@ function board.placeBotToLoad(sectorIndex, bot)
   bot.setRotationSmooth(zone.getRotation(), false)
 end
 
+function board.getControlBots()
+  local controlBots = {}
+  for i, sector in ipairs(sectorZones) do
+    local bots = gmtools.getObjectsFromZone(sector.control, {type = 'bot'})
+    local bot = false
+    if #bots > 0 then
+      bot = bots[1]
+    end
+    controlBots[i] = bot
+  end
+  return controlBots
+end
+
+function board.countOctopods(sectorIndex)
+  local zone_GUID = sectorZones[sectorIndex].octopod
+  return gmtools.countStackableObjectsInZone(zone_GUID, {type = 'octopod'})
+end
+
 function board.setup()
   local sectors_GUIDs, sectorKeys = shuffleSectors()
   for i, sector_GUID in ipairs(sectors_GUIDs) do

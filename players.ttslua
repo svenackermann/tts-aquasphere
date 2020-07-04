@@ -9,8 +9,10 @@ players = {
     countMarker_GUID = 'f362b3',
     pointsMarker_GUID = 'c2e284',
     timeZone_GUID = 'b49c0d',
+    crystalsZone_GUID = 'd0d32b',
     timeProgramZone_GUID = 'e42f7a',
-    labZone_GUID = '6d4e6f'
+    labZone_GUID = '6d4e6f',
+    botSubsSupplyZone_GUID = '99a9c5'
   },
   White = {
     scientist_GUID = 'b8c84b',
@@ -22,8 +24,10 @@ players = {
     countMarker_GUID = '416d17',
     pointsMarker_GUID = 'a78c23',
     timeZone_GUID = 'a5ad52',
+    crystalsZone_GUID = '605631',
     timeProgramZone_GUID = '4ce16d',
-    labZone_GUID = 'b1c7d7'
+    labZone_GUID = 'b1c7d7',
+    botSubsSupplyZone_GUID = '4d9ab4'
   },
   Blue = {
     scientist_GUID = '1b9eb6',
@@ -35,8 +39,10 @@ players = {
     countMarker_GUID = 'ef58a9',
     pointsMarker_GUID = 'd6a886',
     timeZone_GUID = '7997ff',
+    crystalsZone_GUID = 'f456ca',
     timeProgramZone_GUID = '1e34c4',
-    labZone_GUID = '593d4b'
+    labZone_GUID = '593d4b',
+    botSubsSupplyZone_GUID = '67001a'
   },
   Yellow = {
     scientist_GUID = '3f9686',
@@ -48,8 +54,10 @@ players = {
     countMarker_GUID = '733077',
     pointsMarker_GUID = '34aa8d',
     timeZone_GUID = '3daecd',
+    crystalsZone_GUID = '2a6c40',
     timeProgramZone_GUID = 'f52aed',
-    labZone_GUID = '786fca'
+    labZone_GUID = '786fca',
+    botSubsSupplyZone_GUID = '6e433d'
   }
 }
 
@@ -217,4 +225,16 @@ function players.nextRound()
       time.destruct()
     end
   end
+end
+
+function players.countPlacedSubmarines(color)
+  return 6 - #gmtools.getObjectsFromZone(players[color].botSubsSupplyZone_GUID, {type = 'submarine'})
+end
+
+function players.countPlacedBots(color)
+  return 14 - #gmtools.getObjectsFromZone(players[color].botSubsSupplyZone_GUID, {type = 'bot'})
+end
+
+function players.getCrystals(color)
+  return gmtools.countStackableObjectsInZone(players[color].crystalsZone_GUID, {type = 'crystal'})
 end
