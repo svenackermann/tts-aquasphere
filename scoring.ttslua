@@ -3,6 +3,13 @@ scoring = {}
 local scoringScheme = {1, 3, 6, 10, 15, 21}
 scoringScheme[0] = 0
 
+local scoringCard_GUIDs = {
+  Red = 'c4bc0e',
+  White = '81fcd3',
+  Blue = 'ffda47',
+  Yellow = 'b49258'
+}
+
 local function scoreControlSpaces(controlSectors)
   local playerList = {}
   for color, sectors in pairs(controlSectors) do
@@ -65,22 +72,35 @@ local function scoreOctopods(controlSectors)
   return score
 end
 
+local function displayScoring(msgKey, params, color)
+  local total = 0
+  for _, v in ipairs(params) do
+    total = total + v
+  end
+  table.insert(params, total)
+  local scoringCard = getObjectFromGUID(scoringCard_GUIDs[color])
+  scoringCard.setName(msg[msgKey .. 'Title']:format(msg.getPlayerName(color)))
+  scoringCard.setDescription(string.format(msg[msgKey], table.unpack(params)))
+  scoringCard.setInvisibleTo({})
+end
+
+function scoring.hide()
+  for _, card_GUID in pairs(scoringCard_GUIDs) do
+    getObjectFromGUID(card_GUID).setInvisibleTo(Player.getColors())
+  end
+end
+
 function scoring.intermediate()
-  local score = {}
   local controlSectors = getPlayerControlSectors()
   local controlScore = scoreControlSpaces(controlSectors)
   for _, color in ipairs(headquarters.getActivePlayers()) do
     local player = players[color]
-    local v = {
-      control = controlScore[color],
-      bots = scoreBots(player),
-      crystals = scoreCrystals(player),
-      octopods = scoreOctopods(controlSectors[color])
-    }
-    v.total = v.control + v.bots + v.crystals + v.octopods
-    score[color] = v
+    local control = controlScore[color]
+    local bots = scoreBots(player)
+    local crystals = scoreCrystals(player)
+    local octopods = scoreOctopods(controlSectors[color])
+    displayScoring('scoringIntermediate', {control, bots, crystals, octopods}, color)
   end
-  return score
 end
 
 local function scoreLetters(player)
@@ -109,17 +129,12 @@ local function scoreCompletedLab(player)
 end
 
 function scoring.final()
-  local score = {}
   for _, color in ipairs(headquarters.getActivePlayers()) do
     local player = players[color]
-    local v = {
-      letters = scoreLetters(player),
-      time = players.getTime(player),
-      submarines = scoreSubmarines(player),
-      completedLab = scoreCompletedLab(player)
-    }
-    v.total = v.letters + v.time + v.submarines + v.completedLab
-    score[color] = v
+    local letters = scoreLetters(player)
+    local time = players.getTime(player)
+    local submarines = scoreSubmarines(player)
+    local completedLab = scoreCompletedLab(player)
+    displayScoring('scoringFinal', {letters, time, submarines, completedLab}, color)
   end
-  return score
 end

@@ -2,7 +2,9 @@ msg = {
   btn = {
     setupGameSeatedPlayers = 'Start mit\nanwesenden Spielern',
     start = 'Start',
-    nextRound = 'nächste\nRunde'
+    nextRound = 'nächste\nRunde',
+    intermediateScoring = 'Zwischenwertung',
+    finalScoring = 'Schlusswertung',
   },
   color = {
     Red = 'Rot',
@@ -14,10 +16,28 @@ msg = {
   roundNotEnded = 'Es haben noch nicht alle Spieler die Runde beendet.',
   startPlayer = 'Ausgeloster Startspieler: %s',
   intermediateValuation = 'Zeit für die Zwischenwertung',
-  playerEndRound = 'Spieler %s hat die Runde beendet.'
+  playerEndRound = 'Spieler %s hat die Runde beendet.',
+  scoringIntermediateTitle = 'Zwischenwertung für %s',
+  scoringIntermediate = [[
+Mehrheit Kontrollfelder: %d
+eingesetzte Bots: %d
+Kristalle im Vorrat: %d
+nicht gefangene Oktopoden: %d
+
+[u][b]Summe: %d[/b][/u]
+]],
+  scoringFinalTitle = 'Schlusswertung für %s',
+  scoringFinal = [[
+Buchstaben im Labor: %d
+Zeitmarker im Vorrat: %d
+alle U-Boote eingesetzt: %d
+Labor vollständig: %d
+
+[u][b]Summe: %d[/b][/u]
+]]
 }
 
-local function getPlayerName(color)
+function msg.getPlayerName(color)
   local player = Player[color]
   if player.seated then
     return player.steam_name
@@ -27,9 +47,9 @@ local function getPlayerName(color)
 end
 
 function msg.broadcastStartPlayer(color)
-  broadcastToAll(msg.startPlayer:format(getPlayerName(color)), Color.fromString(color))
+  broadcastToAll(msg.startPlayer:format(msg.getPlayerName(color)), Color.fromString(color))
 end
 
 function msg.broadcastPlayerRoundEnd(color)
-  broadcastToAll(msg.playerEndRound:format(getPlayerName(color)), Color.fromString(color))
+  broadcastToAll(msg.playerEndRound:format(msg.getPlayerName(color)), Color.fromString(color))
 end

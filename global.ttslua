@@ -1,5 +1,6 @@
 timeBag_GUID = 'ec8424'
 greySubmarinesBag_GUID = '5234d5'
+
 playerCount = 0
 
 #include <messages>
@@ -12,6 +13,20 @@ playerCount = 0
 #include <turns>
 #include <rounds>
 #include <scoring>
+
+function onLoad()
+  local currentRound = rounds.getCurrent()
+  playerCount = #headquarters.getActivePlayers()
+  if currentRound == 0 then
+    showStartButton()
+    scoring.hide()
+  else
+    if currentRound < 4 then
+      showNextRoundButton()
+    end
+    showScoringButtons()
+  end
+end
 
 setup3PlayersCard_GUID = 'a8734f'
 function showStartButton()
@@ -64,6 +79,35 @@ function showNextRoundButton()
   })
 end
 
+function showScoringButtons()
+  local card = getObjectFromGUID('e5a5f8')
+  card.clearButtons()
+  card.createButton({
+    click_function = 'intermediateScoring',
+    label          = msg.btn.intermediateScoring,
+    position       = {0.6, 2, -5},
+    height         = 700,
+    width          = 1600,
+    font_size      = 200
+  })
+  card.createButton({
+    click_function = 'finalScoring',
+    label          = msg.btn.finalScoring,
+    position       = {4, 2, -5},
+    height         = 700,
+    width          = 1600,
+    font_size      = 200
+  })
+end
+
+function intermediateScoring()
+  scoring.intermediate()
+end
+
+function finalScoring()
+  scoring.final()
+end
+
 function hideButtons()
   local card = getObjectFromGUID(setup3PlayersCard_GUID)
   card.clearButtons()
@@ -101,6 +145,7 @@ function setupGame(thePlayers)
   headquarters.setup(colors)
   msg.broadcastStartPlayer(colors[1])
   showNextRoundButton()
+  showScoringButtons()
 end
 
 function nextRound(obj, color)

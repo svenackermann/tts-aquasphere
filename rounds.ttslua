@@ -1,16 +1,5 @@
 rounds = {}
 
---global
-function onLoad()
-  local currentRound = rounds.getCurrent()
-  playerCount = #headquarters.getActivePlayers()
-  if currentRound == 0 then
-    showStartButton()
-  elseif currentRound < 4 then
-    showNextRoundButton()
-  end
-end
-
 function rounds.next()
   local currentRound = rounds.getCurrent()
   if currentRound >= 4 then
