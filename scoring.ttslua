@@ -46,7 +46,7 @@ local function scoreBots(player)
 end
 
 local function getPlayerControlSectors()
-  local controlBots = board.getControlBots()
+  local controlBots = station.getControlBots()
   local controlSectors = {Red = {}, White = {}, Blue = {}, Yellow = {}}
   for sectorIndex, bot in ipairs(controlBots) do
     if bot then
@@ -65,7 +65,7 @@ end
 local function scoreOctopods(controlSectors)
   local score = 0
   for sectorIndex in ipairs(controlSectors) do
-      local octopods = board.countOctopods(sectorIndex)
+      local octopods = station.countOctopods(sectorIndex)
       octopods = math.min(octopods, #scoringScheme)
       score = score - scoringScheme[octopods]
   end

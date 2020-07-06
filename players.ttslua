@@ -82,7 +82,7 @@ local boardSectorBotActions = {
   F = 'crystal'
 }
 
-local boardScientistPos = {
+local stationScientistPos = {
   {0.12, 1.83, 13.59},
   {11.72, 1.83, 6.71},
   {11.79, 1.83, -6.81},
@@ -101,7 +101,7 @@ local function placeInitBotAndScientist(player, letter, sectorIndex, rotY)
   initBotPos.x = initBotPos.x + deltaX
   getObjectFromGUID(player.initBot_GUID).setPositionSmooth(initBotPos, false)
 
-  local scientistPos = boardScientistPos[sectorIndex]
+  local scientistPos = stationScientistPos[sectorIndex]
   getObjectFromGUID(player.scientist_GUID).setPositionSmooth(scientistPos, false)
 end
 
@@ -120,7 +120,7 @@ end
 local function placeGreyBot(sectorIndex, remainingBaseLabs)
   if remainingBaseLabs == 3 then
     local bot = getObjectFromGUID(greyBotsBag_GUID).takeObject({smooth = false})
-    board.placeBotToLoad(sectorIndex, bot)
+    station.placeBotToLoad(sectorIndex, bot)
     bot.setLock(true)
   end
 end
@@ -129,13 +129,13 @@ local function setupRemainingSectors(letters, sectorsOrder, sectorIndices, subma
   local size = #letters
 
   local sectorIndex = sectorsOrder[letters[1]]
-  board.placeOctopods(sectorIndex, 2)
-  board.placeCrystals(sectorIndex, 1)
+  station.placeOctopods(sectorIndex, 2)
+  station.placeCrystals(sectorIndex, 1)
   placeGreyBot(sectorIndex, size)
 
   sectorIndex = sectorsOrder[letters[2]]
-  board.placeOctopods(sectorIndex, 3)
-  board.placeCrystals(sectorIndex, 2)
+  station.placeOctopods(sectorIndex, 3)
+  station.placeCrystals(sectorIndex, 2)
   placeGreyBot(sectorIndex, size)
 
   if size > 2 then
@@ -204,16 +204,16 @@ function players.setup(thePlayers, sectors)
     local sectorIndex = sectorsOrder[letter]
 
     placeInitBotAndScientist(player, letter, sectorIndex, baseLab.getRotation().y)
-    board.placeOctopods(sectorIndex, 1)
-    board.placeCrystals(sectorIndex, 1)
-    board.placeTime(sectorIndex, 4)
+    station.placeOctopods(sectorIndex, 1)
+    station.placeCrystals(sectorIndex, 1)
+    station.placeTime(sectorIndex, 4)
     sectorIndices[i] = sectorIndex
     submarines[i] = getObjectFromGUID(player.initSubmarine_GUID)
     assignStartTime(player, sectorIndex, sectors)
   end
 
   setupRemainingSectors(letters, sectorsOrder, sectorIndices, submarines)
-  board.placeSubmarines(sectorIndices, submarines)
+  station.placeSubmarines(sectorIndices, submarines)
 
   return shuffledPlayers
 end

@@ -8,7 +8,7 @@ playerCount = 0
 #include <players>
 #include <labs>
 #include <headquarters>
-#include <board>
+#include <station>
 #include <centerTiles>
 #include <turns>
 #include <rounds>
@@ -137,7 +137,7 @@ end
 function setupGame(thePlayers)
   playerCount = #thePlayers
   math.randomseed(os.time())
-  local sectors = board.setup()
+  local sectors = station.setup()
   centerTiles.setup(#thePlayers)
 
   local colors = players.setup(thePlayers, sectors)

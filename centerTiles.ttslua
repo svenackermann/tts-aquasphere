@@ -111,7 +111,7 @@ local function placeSubmarines(submarineSectors)
   for i = 1, #submarineSectors do
     submarines[i] = submarinesBag.takeObject({smooth = false})
   end
-  board.placeSubmarines(submarineSectors, submarines)
+  station.placeSubmarines(submarineSectors, submarines)
 end
 
 local function applyCenterTile(tile)
@@ -122,10 +122,10 @@ local function applyCenterTile(tile)
   for i = 1, 6 do
     local sectorIndex = ((i - 1 + rot) % 6) + 1
     local sectorConfig = tileConfig[i]
-    board.removeTime(sectorIndex)
-    board.placeTime(sectorIndex, sectorConfig[1])
-    board.placeCrystals(sectorIndex, sectorConfig[2])
-    board.placeOctopods(sectorIndex, sectorConfig[3])
+    station.removeTime(sectorIndex)
+    station.placeTime(sectorIndex, sectorConfig[1])
+    station.placeCrystals(sectorIndex, sectorConfig[2])
+    station.placeOctopods(sectorIndex, sectorConfig[3])
     if sectorConfig[4] > 0 then
       table.insert(submarineSectors, sectorIndex)
     end

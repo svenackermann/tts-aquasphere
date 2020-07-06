@@ -1,4 +1,4 @@
-board = {}
+station = {}
 
 local sectors = {
   A = 'ba4a26',
@@ -137,19 +137,19 @@ local function placeTokensInZone(sectorIndex, count, bag_GUID, zoneId)
   end
 end
 
-function board.placeOctopods(sectorIndex, count)
+function station.placeOctopods(sectorIndex, count)
   placeTokensInZone(sectorIndex, count, octopodsBag_GUID, 'octopod')
 end
 
-function board.placeCrystals(sectorIndex, count)
+function station.placeCrystals(sectorIndex, count)
   placeTokensInZone(sectorIndex, count, crystalsBag_GUID, 'crystal')
 end
 
-function board.placeTime(sectorIndex, count)
+function station.placeTime(sectorIndex, count)
   placeTokensInZone(sectorIndex, count, timeBag_GUID, 'time')
 end
 
-function board.removeTime(sectorIndex)
+function station.removeTime(sectorIndex)
   local times = gmtools.getObjectsFromZone(sectorZones[sectorIndex].time, {type = 'time'})
   for _, time in ipairs(times) do
     time.destruct()
@@ -180,7 +180,7 @@ local function findZoneForSubmarine(sectorIndex, submarine, zoneSubs)
   return false
 end
 
-function board.placeSubmarines(sectorIndices, submarines)
+function station.placeSubmarines(sectorIndices, submarines)
   local zoneSubs = {}
   for i, sectorIndex in ipairs(sectorIndices) do
     local found = false
@@ -201,7 +201,7 @@ function board.placeSubmarines(sectorIndices, submarines)
   end
 end
 
-function board.placeBotToLoad(sectorIndex, bot)
+function station.placeBotToLoad(sectorIndex, bot)
   -- TODO works only for first bot currently
   local zone_GUID = sectorZones[sectorIndex].loadingStations[1]
   local zone = getObjectFromGUID(zone_GUID)
@@ -211,7 +211,7 @@ function board.placeBotToLoad(sectorIndex, bot)
   bot.setRotationSmooth(zone.getRotation(), false)
 end
 
-function board.getControlBots()
+function station.getControlBots()
   local controlBots = {}
   for i, sector in ipairs(sectorZones) do
     local bots = gmtools.getObjectsFromZone(sector.control, {type = 'bot'})
@@ -224,12 +224,12 @@ function board.getControlBots()
   return controlBots
 end
 
-function board.countOctopods(sectorIndex)
+function station.countOctopods(sectorIndex)
   local zone_GUID = sectorZones[sectorIndex].octopod
   return gmtools.countStackableObjectsInZone(zone_GUID, {type = 'octopod'})
 end
 
-function board.setup()
+function station.setup()
   local sectors_GUIDs, sectorKeys = shuffleSectors()
   for i, sector_GUID in ipairs(sectors_GUIDs) do
     local sector = getObjectFromGUID(sector_GUID)
@@ -245,7 +245,7 @@ function board.setup()
   return sectorKeys
 end
 
-function board.nextRound()
+function station.nextRound()
   dealResearchCards()
   dealLabExpansions()
 end

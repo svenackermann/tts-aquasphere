@@ -6,7 +6,7 @@ function rounds.next()
     return
   end
 
-  board.nextRound()
+  station.nextRound()
   centerTiles.nextRound()
   headquarters.nextRound(currentRound + 1)
   players.nextRound()
