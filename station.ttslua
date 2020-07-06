@@ -18,11 +18,6 @@ local sectorPositions = {
   {-8.51, 1.06, 4.74}
 }
 
-local labExpansionsBag_GUID = '38554f'
-local researchCardsStack_GUID = 'b9d782'
-local octopodsBag_GUID = '612de1'
-local crystalsBag_GUID = 'e3cb69'
-
 local researchCardPositions = {
   {3.40, 2, 17.62},
   {17.11, 2, 5.76},
@@ -104,49 +99,37 @@ local function shuffleSectors()
 end
 
 local function dealResearchCards()
-  local researchCardsStack = getObjectFromGUID(researchCardsStack_GUID)
   for i, researchCardPosition in ipairs(researchCardPositions) do
-    researchCardsStack.takeObject({
-      position = researchCardPosition,
-      rotation = {0, i * 60 + 233, 0}
-    })
+    supply.take('researchCard', researchCardPosition, {0, i * 60 + 233, 0})
   end
 end
 
 local function dealLabExpansions()
-  local labExpansionsBag = getObjectFromGUID(labExpansionsBag_GUID)
   for i, labExpansionsPosition in ipairs(labExpansionsPositions) do
-    labExpansionsBag.takeObject({
-      position = labExpansionsPosition,
-      rotation = {0, i * 60 + 4, 0}
-    })
+    supply.take('labExpansion', labExpansionsPosition, {0, i * 60 + 4, 0})
   end
 end
 
-local function placeTokensInZone(sectorIndex, count, bag_GUID, zoneId)
-  local bag = getObjectFromGUID(bag_GUID)
-  local zone = getObjectFromGUID(sectorZones[sectorIndex][zoneId])
+local function placeTokensInZone(type, sectorIndex, count)
+  local zone = getObjectFromGUID(sectorZones[sectorIndex][type])
   local pos = zone.getPosition()
   pos.y = 3
   for i = 1, count do
-    bag.takeObject({
-      position = pos,
-      rotation = zone.getRotation()
-    })
+    supply.take(type, pos, zone.getRotation())
     pos.y = pos.y + 0.5
   end
 end
 
 function station.placeOctopods(sectorIndex, count)
-  placeTokensInZone(sectorIndex, count, octopodsBag_GUID, 'octopod')
+  placeTokensInZone('octopod', sectorIndex, count)
 end
 
 function station.placeCrystals(sectorIndex, count)
-  placeTokensInZone(sectorIndex, count, crystalsBag_GUID, 'crystal')
+  placeTokensInZone('crystal', sectorIndex, count)
 end
 
 function station.placeTime(sectorIndex, count)
-  placeTokensInZone(sectorIndex, count, timeBag_GUID, 'time')
+  placeTokensInZone('time', sectorIndex, count)
 end
 
 function station.removeTime(sectorIndex)
@@ -237,8 +220,6 @@ function station.setup()
     sector.setRotation({0.00, 60 * (i - 1), 0.00})
   end
 
-  getObjectFromGUID(labExpansionsBag_GUID).shuffle()
-  getObjectFromGUID(researchCardsStack_GUID).shuffle()
   dealResearchCards()
   dealLabExpansions()
 

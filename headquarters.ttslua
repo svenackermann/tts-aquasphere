@@ -1,6 +1,5 @@
 headquarters = {}
 
-local programCardsBag_GUID = 'd05ff3'
 local nextProgramCardZone_GUID = '38a0c6'
 
 local programTiles_GUIDs = {
@@ -110,11 +109,7 @@ end
 
 local function dealProgramCard(callback)
   local pos = getObjectFromGUID(nextProgramCardZone_GUID).getPosition()
-  getObjectFromGUID(programCardsBag_GUID).takeObject({
-    position = pos,
-    rotation = {0, 0, math.random(0, 1) * 180},
-    callback_function = callback
-  })
+  supply.takeAndThen('programCard', pos, {0, 0, math.random(0, 1) * 180}, callback)
 end
 
 local function applyProgramCard(callback)
@@ -142,7 +137,6 @@ local function applyProgramCard(callback)
 end
 
 function headquarters.setup(colors)
-  getObjectFromGUID(programCardsBag_GUID).shuffle()
   dealProgramCard(function() applyProgramCard(dealProgramCard) end)
   for i, color in ipairs(colors) do
     local player = players[color]

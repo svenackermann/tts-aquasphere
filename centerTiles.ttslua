@@ -1,6 +1,5 @@
 centerTiles = {}
 
-local centerTilesBag_GUID = '478ccc'
 local centerTilesScriptingZone_GUID = '4b43f2'
 
 -- 1st index: player count (2-4)
@@ -89,15 +88,10 @@ local tilesConfigs = {
 }
 
 function centerTiles.setup(noPlayers)
-  for i = 1, 4 do
+  for round = 1, 4 do
     local rotY = (math.random(6) - 1) * 60
-    getObjectFromGUID(centerTilesBag_GUID).takeObject({
-      position          = {0.05, 0.76 + 0.2 * i, -0.19},
-      rotation          = {0, rotY, 0},
-      -- items in bag are indexed in reverse order, so first item has index 11, last has 0
-      -- and of course, index decreases on each takeObject
-      index             = 12 - i - (noPlayers - 2) * 4
-    }).setLock(true)
+    local centerTile = supply.takeCenterTile(noPlayers, round, {0.05, 1.76 - 0.2 * round, -0.19}, {0, rotY, 0})
+    centerTile.setLock(true)
   end
 end
 
@@ -106,10 +100,9 @@ function centerTiles.getPlaced()
 end
 
 local function placeSubmarines(submarineSectors)
-  local submarinesBag = getObjectFromGUID(greySubmarinesBag_GUID)
   local submarines = {}
   for i = 1, #submarineSectors do
-    submarines[i] = submarinesBag.takeObject({smooth = false})
+    submarines[i] = supply.takeFast('greySubmarine')
   end
   station.placeSubmarines(submarineSectors, submarines)
 end
@@ -142,5 +135,5 @@ function centerTiles.nextRound()
     end
   end
   applyCenterTile(topCenterTile)
-  getObjectFromGUID(centerTilesBag_GUID).putObject(topCenterTile)
+  supply.put('centerTile', topCenterTile)
 end

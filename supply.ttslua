@@ -1,0 +1,67 @@
+supply = {}
+
+local container_GUIDs = {
+  labExpansion = '38554f',
+  researchCard = 'b9d782',
+  time = 'ec8424',
+  crystal = 'e3cb69',
+  octopod = '612de1',
+  baseLab = '173592',
+  centerTile = '478ccc',
+  greySubmarine = '5234d5',
+  greyBot = 'c2a84e',
+  programCard = 'd05ff3'
+}
+
+function supply.shuffle()
+  getObjectFromGUID(container_GUIDs.labExpansion).shuffle()
+  getObjectFromGUID(container_GUIDs.researchCard).shuffle()
+  getObjectFromGUID(container_GUIDs.baseLab).shuffle()
+  getObjectFromGUID(container_GUIDs.programCard).shuffle()
+end
+
+local function takeObject(type, params)
+  local container = getObjectFromGUID(container_GUIDs[type])
+  return container.takeObject(params)
+end
+
+function supply.take(type, position, rotation)
+  return takeObject(type, {
+    position = position,
+    rotation = rotation
+  })
+end
+
+function supply.takeFast(type)
+  return takeObject(type, {smooth = false})
+end
+
+function supply.takeAndThen(type, position, rotation, callback)
+  takeObject(type, {
+    position = position,
+    rotation = rotation,
+    callback_function = callback
+  })
+end
+
+function supply.put(type, obj)
+  getObjectFromGUID(container_GUIDs[type]).putObject(obj)
+end
+
+function supply.getContent(type)
+  return getObjectFromGUID(container_GUIDs[type]).getObjects()
+end
+
+function supply.takeCenterTile(noPlayers, round, position, rotation)
+  local centerTilesBag = getObjectFromGUID(container_GUIDs.centerTile)
+  for _, centerTile in ipairs(centerTilesBag.getObjects()) do
+    local ctType = gmtools.parseGmNotes(centerTile.gm_notes)
+    if ctType.players == noPlayers and ctType.round == round then
+      return centerTilesBag.takeObject({
+        position          = position,
+        rotation          = rotation,
+        index             = centerTile.index
+      })
+    end
+  end
+end

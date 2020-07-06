@@ -61,8 +61,6 @@ players = {
   }
 }
 
-local greyBotsBag_GUID = 'c2a84e'
-
 local botActionOrder = {
   lab = 1,
   time = 2,
@@ -119,7 +117,7 @@ end
 
 local function placeGreyBot(sectorIndex, remainingBaseLabs)
   if remainingBaseLabs == 3 then
-    local bot = getObjectFromGUID(greyBotsBag_GUID).takeObject({smooth = false})
+    local bot = supply.takeFast('greyBot')
     station.placeBotToLoad(sectorIndex, bot)
     bot.setLock(true)
   end
@@ -142,13 +140,12 @@ local function setupRemainingSectors(letters, sectorsOrder, sectorIndices, subma
     sectorIndex = sectorsOrder[letters[3]]
     placeGreyBot(sectorIndex, size)
 
-    local greySubmarinesBag = getObjectFromGUID(greySubmarinesBag_GUID)
     table.insert(sectorIndices, sectorIndex)
-    table.insert(submarines, greySubmarinesBag.takeObject({smooth = false}))
+    table.insert(submarines, supply.takeFast('greySubmarine'))
 
     if size > 3 then
       table.insert(sectorIndices, sectorsOrder[letters[4]])
-      table.insert(submarines, greySubmarinesBag.takeObject({smooth = false}))
+      table.insert(submarines, supply.takeFast('greySubmarine'))
     end
   end
 end
@@ -157,12 +154,8 @@ local function assignTime(player, amount)
   local timeZone = getObjectFromGUID(player.timeZone_GUID)
   local pos = timeZone.getPosition()
   pos.y = 3
-  local bag = getObjectFromGUID(timeBag_GUID)
   for i = 1, amount do
-    bag.takeObject({
-      position = pos,
-      rotation = timeZone.getRotation()
-    })
+    supply.take('time', pos, timeZone.getRotation())
     pos.y = pos.y + 0.5
   end
 end
@@ -219,8 +212,8 @@ function players.setup(thePlayers, sectors)
 end
 
 function players.nextRound()
-  for _, player in pairs(players) do
-    local times = gmtools.getObjectsFromZone(player.timeProgramZone_GUID, {type = 'time'})
+  for _, color in ipairs(Player.getAvailableColors()) do
+    local times = gmtools.getObjectsFromZone(players[color].timeProgramZone_GUID, {type = 'time'})
     for _, time in ipairs(times) do
       time.destruct()
     end

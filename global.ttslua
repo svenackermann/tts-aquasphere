@@ -1,10 +1,8 @@
-timeBag_GUID = 'ec8424'
-greySubmarinesBag_GUID = '5234d5'
-
 playerCount = 0
 
 #include <messages>
 #include <utils/gmNotesTools>
+#include <supply>
 #include <players>
 #include <labs>
 #include <headquarters>
@@ -137,6 +135,8 @@ end
 function setupGame(thePlayers)
   playerCount = #thePlayers
   math.randomseed(os.time())
+  supply.shuffle()
+
   local sectors = station.setup()
   centerTiles.setup(#thePlayers)
 

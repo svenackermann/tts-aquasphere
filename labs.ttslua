@@ -1,13 +1,8 @@
 labs = {}
 
-local baseLabsBag_GUID = '173592'
-
 function labs.setup()
-  local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
-  baseLabsBag.shuffle()
-
   local letters = {}
-  local baseLabs = baseLabsBag.getObjects()
+  local baseLabs = supply.getContent('baseLab')
   for _, baseLab in ipairs(baseLabs) do
     local letter = gmtools.parseGmNotes(baseLab.gm_notes).letter
     table.insert(letters, 1, letter)
@@ -20,11 +15,7 @@ function labs.placeBaseLab(player)
   local labPos = labZone.getPosition()
   local labRot = labZone.getRotation()
   labPos.y = 1.06
-  local baseLabsBag = getObjectFromGUID(baseLabsBag_GUID)
-  local baseLab = baseLabsBag.takeObject({
-    position = labPos,
-    rotation = labRot
-  })
+  local baseLab = supply.take('baseLab', labPos, labRot)
   baseLab.setLock(true)
   return baseLab
 end
