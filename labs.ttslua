@@ -1,6 +1,13 @@
 labs = {}
 
-function labs.setup()
+local labZone_GUIDs = {
+  Red = '6d4e6f',
+  White = 'b1c7d7',
+  Blue = '593d4b',
+  Yellow = '786fca'
+}
+
+function labs.getRemainingLabsLetters()
   local letters = {}
   local baseLabs = supply.getContent('baseLab')
   for _, baseLab in ipairs(baseLabs) do
@@ -10,8 +17,8 @@ function labs.setup()
   return letters
 end
 
-function labs.placeBaseLab(player)
-  local labZone = getObjectFromGUID(player.labZone_GUID)
+function labs.placeBaseLab(color)
+  local labZone = getObjectFromGUID(labZone_GUIDs[color])
   local labPos = labZone.getPosition()
   local labRot = labZone.getRotation()
   labPos.y = 1.06
@@ -20,8 +27,8 @@ function labs.placeBaseLab(player)
   return baseLab
 end
 
-function labs.getCapacities(player)
-  local baseLabs = gmtools.getObjectsFromZone(player.labZone_GUID, {type = 'baseLab'})
+function labs.getCapacities(color)
+  local baseLabs = gmtools.getObjectsFromZone(labZone_GUIDs[color], {type = 'baseLab'})
   local capacities = {
     time = 0,
     crystal = 0,
@@ -40,7 +47,7 @@ function labs.getCapacities(player)
     capacities.research = 2
     capacities.octopod = 2
     capacities[gmtools.parse(baseLabs[1]).letter] = 1
-    local labExps = gmtools.getObjectsFromZone(player.labZone_GUID, {type = 'labExp'})
+    local labExps = gmtools.getObjectsFromZone(labZone_GUIDs[color], {type = 'labExp'})
     for _, labExp in ipairs(labExps) do
       local value = gmtools.parse(labExp)
       capacities[value.l] = capacities[value.l] + 1
@@ -51,6 +58,6 @@ function labs.getCapacities(player)
   return capacities
 end
 
-function labs.countExpansions(player)
-  return #gmtools.getObjectsFromZone(player.labZone_GUID, {type = 'labExp'})
+function labs.countExpansions(color)
+  return #gmtools.getObjectsFromZone(labZone_GUIDs[color], {type = 'labExp'})
 end

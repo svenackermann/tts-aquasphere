@@ -35,13 +35,13 @@ local function scoreControlSpaces(controlSectors)
   return score
 end
 
-local function scoreBots(player)
-  local placedSubs = players.countPlacedSubmarines(player)
+local function scoreBots(color)
+  local placedSubs = players.countPlacedSubmarines(color)
   if placedSubs == 0 then
     return 0
   end
   local maxScore = placedSubs * 2 + 2
-  local placedBots = players.countPlacedBots(player)
+  local placedBots = players.countPlacedBots(color)
   return math.min(maxScore, placedBots)
 end
 
@@ -56,8 +56,8 @@ local function getPlayerControlSectors()
   return controlSectors
 end
 
-local function scoreCrystals(player)
-  local crystals = players.getCrystals(player)
+local function scoreCrystals(color)
+  local crystals = players.countCrystals(color)
   crystals = math.min(crystals, #scoringScheme)
   return scoringScheme[crystals]
 end
@@ -94,17 +94,16 @@ function scoring.intermediate()
   local controlSectors = getPlayerControlSectors()
   local controlScore = scoreControlSpaces(controlSectors)
   for _, color in ipairs(headquarters.getActivePlayers()) do
-    local player = players[color]
     local control = controlScore[color]
-    local bots = scoreBots(player)
-    local crystals = scoreCrystals(player)
+    local bots = scoreBots(color)
+    local crystals = scoreCrystals(color)
     local octopods = scoreOctopods(controlSectors[color])
     displayScoring('scoringIntermediate', {control, bots, crystals, octopods}, color)
   end
 end
 
-local function scoreLetters(player)
-  local capacities = labs.getCapacities(player)
+local function scoreLetters(color)
+  local capacities = labs.getCapacities(color)
   local uniqueLetters = 0
   for _, letter in ipairs({'A', 'B', 'C', 'D', 'E', 'F'}) do
     if capacities[letter] > 0 then
@@ -114,15 +113,15 @@ local function scoreLetters(player)
   return scoringScheme[uniqueLetters]
 end
 
-local function scoreSubmarines(player)
-  if players.countPlacedSubmarines(player) == 6 then
+local function scoreSubmarines(color)
+  if players.countPlacedSubmarines(color) == 6 then
     return 5
   end
   return 0
 end
 
-local function scoreCompletedLab(player)
-  if labs.countExpansions(player) == 5 then
+local function scoreCompletedLab(color)
+  if labs.countExpansions(color) == 5 then
     return 5
   end
   return 0
@@ -130,11 +129,10 @@ end
 
 function scoring.final()
   for _, color in ipairs(headquarters.getActivePlayers()) do
-    local player = players[color]
-    local letters = scoreLetters(player)
-    local time = players.getTime(player)
-    local submarines = scoreSubmarines(player)
-    local completedLab = scoreCompletedLab(player)
+    local letters = scoreLetters(color)
+    local time = players.countTime(color)
+    local submarines = scoreSubmarines(color)
+    local completedLab = scoreCompletedLab(color)
     displayScoring('scoringFinal', {letters, time, submarines, completedLab}, color)
   end
 end

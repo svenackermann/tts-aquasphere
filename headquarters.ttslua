@@ -67,6 +67,33 @@ local turnOrderZones_GUIDs = {
   '8cd6a0'
 }
 
+local playerFigures = {
+  Red = {
+    engineer_GUID = '6c48a0',
+    orderBot_GUID = '93cf49',
+    countMarker_GUID = 'f362b3',
+    pointsMarker_GUID = 'c2e284'
+  },
+  White = {
+    engineer_GUID = 'dce324',
+    orderBot_GUID = 'b41cd6',
+    countMarker_GUID = '416d17',
+    pointsMarker_GUID = 'a78c23'
+  },
+  Blue = {
+    engineer_GUID = 'decf71',
+    orderBot_GUID = '1551b8',
+    countMarker_GUID = 'ef58a9',
+    pointsMarker_GUID = 'd6a886'
+  },
+  Yellow = {
+    engineer_GUID = '4e9fd3',
+    orderBot_GUID = '0420ec',
+    countMarker_GUID = '733077',
+    pointsMarker_GUID = '34aa8d'
+  }
+}
+
 function headquarters.getActivePlayers()
   local result = {}
   for i, zone_GUID in ipairs(turnOrderZones_GUIDs) do
@@ -96,12 +123,12 @@ function headquarters.roundEndReached()
   return #activePlayers == #passedPlayers
 end
 
-local function positionOrderBotAndEngineer(player, pos)
-  local engineer = getObjectFromGUID(player.engineer_GUID)
+local function positionOrderBotAndEngineer(figures, pos)
+  local engineer = getObjectFromGUID(figures.engineer_GUID)
   engineer.setPositionSmooth({-30.1 - 1.1 * pos, 1.83, 6.4}, false)
   local zonePos = getObjectFromGUID(turnOrderZones_GUIDs[pos]).getPosition()
   zonePos.y = 1.6
-  local orderBot = getObjectFromGUID(player.orderBot_GUID)
+  local orderBot = getObjectFromGUID(figures.orderBot_GUID)
   orderBot.setLock(true)
   orderBot.setPositionSmooth(zonePos, false)
   return engineer
@@ -139,10 +166,10 @@ end
 function headquarters.setup(colors)
   dealProgramCard(function() applyProgramCard(dealProgramCard) end)
   for i, color in ipairs(colors) do
-    local player = players[color]
-    positionOrderBotAndEngineer(player, i)
-    getObjectFromGUID(player.countMarker_GUID).setPositionSmooth({-26.85, 0.89 + i, 3.39}, false)
-    getObjectFromGUID(player.pointsMarker_GUID).setPositionSmooth({-24.52, 0.89 + i, 2.10}, false)
+    local figures = playerFigures[color]
+    positionOrderBotAndEngineer(figures, i)
+    getObjectFromGUID(figures.countMarker_GUID).setPositionSmooth({-26.85, 0.89 + i, 3.39}, false)
+    getObjectFromGUID(figures.pointsMarker_GUID).setPositionSmooth({-24.52, 0.89 + i, 2.10}, false)
   end
 end
 
@@ -156,8 +183,8 @@ function headquarters.nextRound(round)
   local passedPlayers = headquarters.getPassedPlayers()
   local lastEngineer
   for i, passedPlayer in ipairs(passedPlayers) do
-    local player = players[passedPlayer]
-    lastEngineer = positionOrderBotAndEngineer(player, i)
+    local figures = playerFigures[passedPlayer]
+    lastEngineer = positionOrderBotAndEngineer(figures, i)
   end
   local enableTurns = function()
     turns.setup(passedPlayers)
