@@ -24,7 +24,6 @@ function onPlayerTurnEnd()
 
   if #activePlayers == #passedPlayers then
     pause()
-    broadcastToAll(msg.intermediateValuation, Color.Green)
   else
     local passed = {}
     for _, passedPlayer in ipairs(passedPlayers) do

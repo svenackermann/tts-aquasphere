@@ -92,15 +92,6 @@ local function assignTime(player, amount)
   end
 end
 
-function players.assignTime(color, amount)
-  local capacity = labs.getCapacities(color).time
-  local existing = gmtools.countStackableObjectsInZone(playerConfigs[color].timeZone_GUID, {type = 'time'})
-  local count = math.min(capacity - existing, amount)
-  if count > 0 then
-    assignTime(playerConfigs[color], count)
-  end
-end
-
 function players.setup(color, sectorIndex, letter, startTime)
   local player = playerConfigs[color]
   placeInitBotAndScientist(player, letter, sectorIndex)
@@ -108,12 +99,18 @@ function players.setup(color, sectorIndex, letter, startTime)
   return getObjectFromGUID(player.initSubmarine_GUID)
 end
 
+local function hideTimeButton(player)
+  getObjectFromGUID(player.board_GUID).clearButtons()
+end
+
 function players.nextRound()
   for _, color in ipairs(Player.getAvailableColors()) do
-    local times = gmtools.getObjectsFromZone(playerConfigs[color].timeProgramZone_GUID, {type = 'time'})
+    local player = playerConfigs[color]
+    local times = gmtools.getObjectsFromZone(player.timeProgramZone_GUID, {type = 'time'})
     for _, time in ipairs(times) do
       time.destruct()
     end
+    hideTimeButton(player)
   end
 end
 
@@ -131,4 +128,35 @@ end
 
 function players.countTime(color)
   return gmtools.countStackableObjectsInZone(playerConfigs[color].timeZone_GUID, {type = 'time'})
+end
+
+local function assignTimeWithCapacity(color, amount)
+  local capacity = labs.getCapacities(color).time
+  local existing = gmtools.countStackableObjectsInZone(playerConfigs[color].timeZone_GUID, {type = 'time'})
+  local count = math.min(capacity - existing, amount)
+  if count > 0 then
+    assignTime(playerConfigs[color], count)
+  end
+end
+
+function takeTimeForSubmarines(obj)
+  local color = gmtools.parse(obj).color
+  local player = playerConfigs[color]
+  hideTimeButton(player)
+  local submarines = players.countPlacedSubmarines(color)
+  assignTimeWithCapacity(color, submarines)
+end
+
+function players.showTimeButtons()
+  for _, color in ipairs(headquarters.getActivePlayers()) do
+    getObjectFromGUID(playerConfigs[color].board_GUID).createButton({
+      click_function = 'takeTimeForSubmarines',
+      label          = msg.btn.takeTime,
+      position       = {1.1, 0.1, -0.5},
+      width          = 500,
+      font_size      = 70,
+      color          = Color.Black,
+      font_color     = Color.Yellow
+    })
+  end
 end

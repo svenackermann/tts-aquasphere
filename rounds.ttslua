@@ -8,28 +8,50 @@ local function hideButton()
   return hq
 end
 
-local function next()
-  local currentRound = rounds.getCurrent()
-  if currentRound >= 4 then
-    return
-  end
-
-  station.nextRound()
-  centerTiles.nextRound()
-  headquarters.nextRound(currentRound + 1)
-  players.nextRound()
-
-  if currentRound >= 3 then
-    hideButtons()
+function endRound(obj, color)
+  if headquarters.roundEndReached() then
+    players.showTimeButtons()
+    local currentRound = rounds.getCurrent()
+    if currentRound < 4 then
+      obj.editButton({
+        index          = 0,
+        click_function = 'nextRound',
+        label          = msg.btn.nextRound
+      })
+      broadcastToAll(msg.roundEnd, Color.Green)
+    else
+      hideButton()
+      broadcastToAll(msg.lastRoundEnd, Color.Green)
+    end
+  else
+    broadcastToColor(msg.roundNotEnded, color, Color.Red)
   end
 end
 
 function nextRound(obj, color)
-  if headquarters.roundEndReached() then
-    next()
-  else
-    broadcastToColor(msg.roundNotEnded, color, Color.Red)
-  end
+  local currentRound = rounds.getCurrent()
+
+  station.nextRound()
+  centerTiles.nextRound()
+  headquarters.nextRound(currentRound >= 3)
+  players.nextRound()
+
+  obj.editButton({
+    index          = 0,
+    click_function = 'endRound',
+    label          = msg.btn.endRound
+  })
+end
+
+function rounds.showButton()
+  local hq = hideButton()
+  hq.createButton({
+    click_function = 'endRound',
+    label          = msg.btn.endRound,
+    position       = {2.9, 0, -1.5},
+    height         = 300,
+    width          = 500
+  })
 end
 
 function rounds.showNextButton()

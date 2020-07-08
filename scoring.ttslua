@@ -92,7 +92,11 @@ function scoring.hide()
   end
 end
 
-function intermediateScoring()
+function intermediateScoring(obj, color, alt_click)
+  if alt_click then
+    scoring.hide()
+    return
+  end
   local controlSectors = getPlayerControlSectors()
   local controlScore = scoreControlSpaces(controlSectors)
   for _, color in ipairs(headquarters.getActivePlayers()) do
@@ -129,7 +133,11 @@ local function scoreCompletedLab(color)
   return 0
 end
 
-function finalScoring()
+function finalScoring(obj, color, alt_click)
+  if alt_click then
+    scoring.hide()
+    return
+  end
   for _, color in ipairs(headquarters.getActivePlayers()) do
     local letters = scoreLetters(color)
     local time = players.countTime(color)

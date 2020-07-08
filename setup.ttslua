@@ -110,7 +110,7 @@ local function setupGame(colors)
   headquarters.setup(colors)
   msg.broadcastStartPlayer(colors[1])
 
-  rounds.showNextButton()
+  rounds.showButton()
   scoring.showButtons()
 end
 

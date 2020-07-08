@@ -20,9 +20,7 @@ function onLoad()
     scoring.hide()
   else
     playerCount = #headquarters.getActivePlayers()
-    if currentRound < 4 then
-      rounds.showNextButton()
-    end
+    rounds.showButton()
     scoring.showButtons()
   end
 end
