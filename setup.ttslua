@@ -1,0 +1,172 @@
+setup = {}
+
+local setup3PlayersCard_GUID = 'a8734f'
+
+local function shufflePlayers(colors)
+  local startPlayer = math.random(1, #colors)
+  if startPlayer == 1 then
+    return colors
+  end
+  local shuffled = {unpack(colors, startPlayer)}
+  for i = 1, startPlayer - 1 do
+    table.insert(shuffled, colors[i])
+  end
+  return shuffled
+end
+
+local function shuffleSectors()
+  local letters = {'A', 'B', 'C', 'D', 'E', 'F'}
+  --Fisher-Yates
+  for i = #letters, 2, -1 do
+    local j = math.random(i)
+    letters[i], letters[j] = letters[j], letters[i]
+  end
+  return letters
+end
+
+local function placeGreyBot(sectorIndex, remainingBaseLabs)
+  if remainingBaseLabs == 3 then
+    local bot = supply.takeFast('greyBot')
+    station.placeBotToLoad(sectorIndex, bot)
+    bot.setLock(true)
+  end
+end
+
+local function setupRemainingSectors(sectorsOrder, sectorIndices, submarines)
+  local letters = labs.getRemainingLabsLetters()
+  local size = #letters
+
+  local sectorIndex = sectorsOrder[letters[1]]
+  station.placeOctopods(sectorIndex, 2)
+  station.placeCrystals(sectorIndex, 1)
+  placeGreyBot(sectorIndex, size)
+
+  sectorIndex = sectorsOrder[letters[2]]
+  station.placeOctopods(sectorIndex, 3)
+  station.placeCrystals(sectorIndex, 2)
+  placeGreyBot(sectorIndex, size)
+
+  if size > 2 then
+    sectorIndex = sectorsOrder[letters[3]]
+    placeGreyBot(sectorIndex, size)
+
+    table.insert(sectorIndices, sectorIndex)
+    table.insert(submarines, supply.takeFast('greySubmarine'))
+
+    if size > 3 then
+      table.insert(sectorIndices, sectorsOrder[letters[4]])
+      table.insert(submarines, supply.takeFast('greySubmarine'))
+    end
+  end
+end
+
+local function getStartTime(sectorIndex, sectorsOrder)
+  local indexF = sectorsOrder.F
+  local prevSectorIndex = (sectorIndex - 2) % 6 + 1
+  local amount = 4
+  if sectorIndex == indexF or prevSectorIndex == indexF then
+    amount = 3
+  end
+  return amount
+end
+
+local function setupSectors(colors, sectors)
+  station.setup(sectors)
+
+  local sectorsOrder = {}
+  for i, v in ipairs(sectors) do
+    sectorsOrder[v] = i
+  end
+
+  local sectorIndices = {}
+  local submarines = {}
+  for i, color in ipairs(colors) do
+    local baseLab = labs.placeBaseLab(color)
+    local letter = gmtools.parse(baseLab).letter
+    local sectorIndex = sectorsOrder[letter]
+    local startTime = getStartTime(sectorIndex, sectorsOrder)
+    submarines[i] = players.setup(color, sectorIndex, letter, startTime)
+    station.placeOctopods(sectorIndex, 1)
+    station.placeCrystals(sectorIndex, 1)
+    station.placeTime(sectorIndex, 4)
+    sectorIndices[i] = sectorIndex
+  end
+
+  setupRemainingSectors(sectorsOrder, sectorIndices, submarines)
+  station.placeSubmarines(sectorIndices, submarines)
+end
+
+local function setupGame(colors)
+  playerCount = #colors
+  getObjectFromGUID(setup3PlayersCard_GUID).clearButtons()
+  math.randomseed(os.time())
+  supply.shuffle()
+  local sectors = shuffleSectors()
+  colors = shufflePlayers(colors)
+
+  setupSectors(colors, sectors)
+  centerTiles.setup()
+  turns.setup(colors)
+  headquarters.setup(colors)
+  msg.broadcastStartPlayer(colors[1])
+
+  rounds.showNextButton()
+  scoring.showButtons()
+end
+
+function setupGame2Players()
+  setupGame({'Yellow', 'Red'})
+end
+
+function setupGame3Players()
+  setupGame({'Yellow', 'Red', 'White'})
+end
+
+function setupGame4Players()
+  setupGame({'Yellow', 'Red', 'White', 'Blue'})
+end
+
+function setupGameSeatedPlayers(obj, color)
+  local seatedPlayers = getSeatedPlayers()
+  if #seatedPlayers < 2 then
+    broadcastToColor(msg.atLeast2Players, color, Color.Red)
+  else
+    setupGame(seatedPlayers)
+  end
+end
+
+function setup.showButtons()
+  local card = getObjectFromGUID(setup3PlayersCard_GUID)
+  card.createButton({
+    click_function = 'setupGameSeatedPlayers',
+    label          = msg.btn.setupGameSeatedPlayers,
+    position       = {0, 2, -3},
+    height         = 700,
+    width          = 3100,
+    font_size      = 300
+  })
+  card.createButton({
+    click_function = 'setupGame2Players',
+    label          = msg.btn.start,
+    position       = {-2.3, 2, 2.5},
+    height         = 500,
+    width          = 1000,
+    font_size      = 300
+  })
+  card.createButton({
+    click_function = 'setupGame3Players',
+    label          = msg.btn.start,
+    position       = {0, 2, 2.5},
+    height         = 500,
+    width          = 1000,
+    font_size      = 300
+  })
+  card.createButton({
+    click_function = 'setupGame4Players',
+    label          = msg.btn.start,
+    position       = {2.3, 2, 2.5},
+    height         = 500,
+    width          = 1000,
+    font_size      = 300
+  })
+end

@@ -87,10 +87,10 @@ local tilesConfigs = {
   }
 }
 
-function centerTiles.setup(noPlayers)
+function centerTiles.setup()
   for round = 1, 4 do
     local rotY = (math.random(6) - 1) * 60
-    local centerTile = supply.takeCenterTile(noPlayers, round, {0.05, 1.76 - 0.2 * round, -0.19}, {0, rotY, 0})
+    local centerTile = supply.takeCenterTile(playerCount, round, {0.05, 1.76 - 0.2 * round, -0.19}, {0, rotY, 0})
     centerTile.setLock(true)
   end
 end

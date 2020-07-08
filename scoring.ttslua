@@ -10,6 +10,8 @@ local scoringCard_GUIDs = {
   Yellow = 'b49258'
 }
 
+local setup2PlayersCard_GUID = 'e5a5f8'
+
 local function scoreControlSpaces(controlSectors)
   local playerList = {}
   for color, sectors in pairs(controlSectors) do
@@ -90,7 +92,7 @@ function scoring.hide()
   end
 end
 
-function scoring.intermediate()
+function intermediateScoring()
   local controlSectors = getPlayerControlSectors()
   local controlScore = scoreControlSpaces(controlSectors)
   for _, color in ipairs(headquarters.getActivePlayers()) do
@@ -127,7 +129,7 @@ local function scoreCompletedLab(color)
   return 0
 end
 
-function scoring.final()
+function finalScoring()
   for _, color in ipairs(headquarters.getActivePlayers()) do
     local letters = scoreLetters(color)
     local time = players.countTime(color)
@@ -135,4 +137,24 @@ function scoring.final()
     local completedLab = scoreCompletedLab(color)
     displayScoring('scoringFinal', {letters, time, submarines, completedLab}, color)
   end
+end
+
+function scoring.showButtons()
+  local card = getObjectFromGUID('e5a5f8')
+  card.createButton({
+    click_function = 'intermediateScoring',
+    label          = msg.btn.intermediateScoring,
+    position       = {2.5, 2, -5},
+    height         = 800,
+    width          = 2500,
+    font_size      = 300
+  })
+  card.createButton({
+    click_function = 'finalScoring',
+    label          = msg.btn.finalScoring,
+    position       = {2.5, 2, -3},
+    height         = 800,
+    width          = 2500,
+    font_size      = 300
+  })
 end

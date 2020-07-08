@@ -1,6 +1,6 @@
 station = {}
 
-local sectors = {
+local sector_GUIDs = {
   A = 'ba4a26',
   B = '88ac24',
   C = '5f06a8',
@@ -86,17 +86,6 @@ local sectorZones = {
     loadingStations = {'741281'}
   }
 }
-
-local function shuffleSectors()
-  local guids = {}
-  local sectorKeys = {}
-  for k, v in pairs(sectors) do
-  	local pos = math.random(1, #guids + 1)
-  	table.insert(guids, pos, v)
-    table.insert(sectorKeys, pos, k)
-  end
-  return guids, sectorKeys
-end
 
 local function dealResearchCards()
   for i, researchCardPosition in ipairs(researchCardPositions) do
@@ -212,18 +201,15 @@ function station.countOctopods(sectorIndex)
   return gmtools.countStackableObjectsInZone(zone_GUID, {type = 'octopod'})
 end
 
-function station.setup()
-  local sectors_GUIDs, sectorKeys = shuffleSectors()
-  for i, sector_GUID in ipairs(sectors_GUIDs) do
-    local sector = getObjectFromGUID(sector_GUID)
+function station.setup(sectors)
+  for i, letter in ipairs(sectors) do
+    local sector = getObjectFromGUID(sector_GUIDs[letter])
     sector.setPositionSmooth(sectorPositions[i], false)
     sector.setRotation({0.00, 60 * (i - 1), 0.00})
   end
 
   dealResearchCards()
   dealLabExpansions()
-
-  return sectorKeys
 end
 
 function station.nextRound()

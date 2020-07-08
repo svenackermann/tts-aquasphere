@@ -11,147 +11,18 @@ playerCount = 0
 #include <turns>
 #include <rounds>
 #include <scoring>
+#include <setup>
 
 function onLoad()
   local currentRound = rounds.getCurrent()
-  playerCount = #headquarters.getActivePlayers()
   if currentRound == 0 then
-    showStartButton()
+    setup.showButtons()
     scoring.hide()
   else
+    playerCount = #headquarters.getActivePlayers()
     if currentRound < 4 then
-      showNextRoundButton()
+      rounds.showNextButton()
     end
-    showScoringButtons()
-  end
-end
-
-setup3PlayersCard_GUID = 'a8734f'
-function showStartButton()
-  local card = getObjectFromGUID(setup3PlayersCard_GUID)
-  card.clearButtons()
-  card.createButton({
-    click_function = 'setupGameSeatedPlayers',
-    label          = msg.btn.setupGameSeatedPlayers,
-    position       = {0, 2, -3},
-    height         = 700,
-    width          = 3100,
-    font_size      = 300
-  })
-  card.createButton({
-    click_function = 'setupGame2Players',
-    label          = msg.btn.start,
-    position       = {-2.3, 2, 2.5},
-    height         = 500,
-    width          = 1000,
-    font_size      = 300
-  })
-  card.createButton({
-    click_function = 'setupGame3Players',
-    label          = msg.btn.start,
-    position       = {0, 2, 2.5},
-    height         = 500,
-    width          = 1000,
-    font_size      = 300
-  })
-  card.createButton({
-    click_function = 'setupGame4Players',
-    label          = msg.btn.start,
-    position       = {2.3, 2, 2.5},
-    height         = 500,
-    width          = 1000,
-    font_size      = 300
-  })
-end
-
-function showNextRoundButton()
-  local card = getObjectFromGUID(setup3PlayersCard_GUID)
-  card.clearButtons()
-  card.createButton({
-    click_function = 'nextRound',
-    label          = msg.btn.nextRound,
-    position       = {0, 2, -3},
-    height         = 700,
-    width          = 1500,
-    font_size      = 300
-  })
-end
-
-function showScoringButtons()
-  local card = getObjectFromGUID('e5a5f8')
-  card.clearButtons()
-  card.createButton({
-    click_function = 'intermediateScoring',
-    label          = msg.btn.intermediateScoring,
-    position       = {0.6, 2, -5},
-    height         = 700,
-    width          = 1600,
-    font_size      = 200
-  })
-  card.createButton({
-    click_function = 'finalScoring',
-    label          = msg.btn.finalScoring,
-    position       = {4, 2, -5},
-    height         = 700,
-    width          = 1600,
-    font_size      = 200
-  })
-end
-
-function intermediateScoring()
-  scoring.intermediate()
-end
-
-function finalScoring()
-  scoring.final()
-end
-
-function hideButtons()
-  local card = getObjectFromGUID(setup3PlayersCard_GUID)
-  card.clearButtons()
-end
-
-function setupGame2Players()
-  setupGame({'Yellow', 'Red'})
-end
-
-function setupGame3Players()
-  setupGame({'Yellow', 'Red', 'White'})
-end
-
-function setupGame4Players()
-  setupGame({'Yellow', 'Red', 'White', 'Blue'})
-end
-
-function setupGameSeatedPlayers(obj, color)
-  local seatedPlayers = getSeatedPlayers()
-  if #seatedPlayers < 2 then
-    broadcastToColor(msg.atLeast2Players, color, Color.Red)
-  else
-    setupGame(seatedPlayers)
-  end
-end
-
-function setupGame(thePlayers)
-  playerCount = #thePlayers
-  math.randomseed(os.time())
-  supply.shuffle()
-
-  local sectors = station.setup()
-  centerTiles.setup(#thePlayers)
-
-  local colors = players.setup(thePlayers, sectors)
-  turns.setup(colors)
-  headquarters.setup(colors)
-  msg.broadcastStartPlayer(colors[1])
-  showNextRoundButton()
-  showScoringButtons()
-end
-
-function nextRound(obj, color)
-  if headquarters.roundEndReached() then
-    rounds.next()
-  else
-    broadcastToColor(msg.roundNotEnded, color, Color.Red)
+    scoring.showButtons()
   end
 end

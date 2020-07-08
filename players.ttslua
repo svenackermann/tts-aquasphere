@@ -2,48 +2,44 @@ players = {}
 
 local playerConfigs = {
   Red = {
+    board_GUID = '3b7c6e',
     scientist_GUID = 'c3f106',
     initBot_GUID = '7093d9',
     initSubmarine_GUID = 'f322bd',
-    labBotPos = {42.64, 1.49, 16.26},
     timeZone_GUID = 'b49c0d',
     crystalsZone_GUID = 'd0d32b',
     timeProgramZone_GUID = 'e42f7a',
-    botSubsSupplyZone_GUID = '99a9c5',
-    rotY = 0
+    botSubsSupplyZone_GUID = '99a9c5'
   },
   White = {
+    board_GUID = '07611e',
     scientist_GUID = 'b8c84b',
     initBot_GUID = '5d7798',
     initSubmarine_GUID = 'e9e19f',
-    labBotPos = {29.34, 1.48, -16.26},
     timeZone_GUID = 'a5ad52',
     crystalsZone_GUID = '605631',
     timeProgramZone_GUID = '4ce16d',
-    botSubsSupplyZone_GUID = '4d9ab4',
-    rotY = 180
+    botSubsSupplyZone_GUID = '4d9ab4'
   },
   Blue = {
+    board_GUID = '73a8fa',
     scientist_GUID = '1b9eb6',
     initBot_GUID = '0b1fba',
     initSubmarine_GUID = 'ff537d',
-    labBotPos = {-42.65, 1.49, -16.24},
     timeZone_GUID = '7997ff',
     crystalsZone_GUID = 'f456ca',
     timeProgramZone_GUID = '1e34c4',
-    botSubsSupplyZone_GUID = '67001a',
-    rotY = 180
+    botSubsSupplyZone_GUID = '67001a'
   },
   Yellow = {
+    board_GUID = 'b317d9',
     scientist_GUID = '3f9686',
     initBot_GUID = 'ce340c',
     initSubmarine_GUID = 'bea65d',
-    labBotPos = {-29.38, 1.49, 16.23},
     timeZone_GUID = '3daecd',
     crystalsZone_GUID = '2a6c40',
     timeProgramZone_GUID = 'f52aed',
-    botSubsSupplyZone_GUID = '6e433d',
-    rotY = 0
+    botSubsSupplyZone_GUID = '6e433d'
   }
 }
 
@@ -77,64 +73,13 @@ local stationScientistPos = {
 
 local function placeInitBotAndScientist(player, letter, sectorIndex)
   local action = boardSectorBotActions[letter]
-  local deltaX = (botActionOrder[action] - 1) * 1.5
-  if player.rotY == 0 then
-    deltaX = -deltaX
-  end
-  local initBotPos = Vector(player.labBotPos)
-  initBotPos.x = initBotPos.x + deltaX
+  local deltaX = (botActionOrder[action] - 1) * 0.31
+  local board = getObjectFromGUID(player.board_GUID)
+  local initBotPos = board.positionToWorld({1.38 - deltaX, 0.6, -0.78})
   getObjectFromGUID(player.initBot_GUID).setPositionSmooth(initBotPos, false)
 
   local scientistPos = stationScientistPos[sectorIndex]
   getObjectFromGUID(player.scientist_GUID).setPositionSmooth(scientistPos, false)
-end
-
-function shufflePlayers(thePlayers)
-  local startPlayer = math.random(1, #thePlayers)
-  if startPlayer == 1 then
-    return thePlayers
-  end
-  local shuffled = {unpack(thePlayers, startPlayer)}
-  for i = 1, startPlayer - 1 do
-    table.insert(shuffled, thePlayers[i])
-  end
-  return shuffled
-end
-
-local function placeGreyBot(sectorIndex, remainingBaseLabs)
-  if remainingBaseLabs == 3 then
-    local bot = supply.takeFast('greyBot')
-    station.placeBotToLoad(sectorIndex, bot)
-    bot.setLock(true)
-  end
-end
-
-local function setupRemainingSectors(sectorsOrder, sectorIndices, submarines)
-  local letters = labs.getRemainingLabsLetters()
-  local size = #letters
-
-  local sectorIndex = sectorsOrder[letters[1]]
-  station.placeOctopods(sectorIndex, 2)
-  station.placeCrystals(sectorIndex, 1)
-  placeGreyBot(sectorIndex, size)
-
-  sectorIndex = sectorsOrder[letters[2]]
-  station.placeOctopods(sectorIndex, 3)
-  station.placeCrystals(sectorIndex, 2)
-  placeGreyBot(sectorIndex, size)
-
-  if size > 2 then
-    sectorIndex = sectorsOrder[letters[3]]
-    placeGreyBot(sectorIndex, size)
-
-    table.insert(sectorIndices, sectorIndex)
-    table.insert(submarines, supply.takeFast('greySubmarine'))
-
-    if size > 3 then
-      table.insert(sectorIndices, sectorsOrder[letters[4]])
-      table.insert(submarines, supply.takeFast('greySubmarine'))
-    end
-  end
 end
 
 local function assignTime(player, amount)
@@ -156,43 +101,11 @@ function players.assignTime(color, amount)
   end
 end
 
-local function assignStartTime(player, sectorIndex, sectors)
-  local prevSector = (sectorIndex - 2) % 6 + 1
-  local amount = 4
-  if sectors[sectorIndex] == 'F' or sectors[prevSector] == 'F' then
-    amount = 3
-  end
-  assignTime(player, amount)
-end
-
-function players.setup(thePlayers, sectors)
-  local sectorsOrder = {}
-  for i, v in ipairs(sectors) do
-    sectorsOrder[v] = i
-  end
-
-  local shuffledPlayers = shufflePlayers(thePlayers)
-  local sectorIndices = {}
-  local submarines = {}
-  for i, color in ipairs(shuffledPlayers) do
-    local player = playerConfigs[color]
-    local baseLab = labs.placeBaseLab(color)
-    local letter = gmtools.parse(baseLab).letter
-    local sectorIndex = sectorsOrder[letter]
-
-    placeInitBotAndScientist(player, letter, sectorIndex)
-    station.placeOctopods(sectorIndex, 1)
-    station.placeCrystals(sectorIndex, 1)
-    station.placeTime(sectorIndex, 4)
-    sectorIndices[i] = sectorIndex
-    submarines[i] = getObjectFromGUID(player.initSubmarine_GUID)
-    assignStartTime(player, sectorIndex, sectors)
-  end
-
-  setupRemainingSectors(sectorsOrder, sectorIndices, submarines)
-  station.placeSubmarines(sectorIndices, submarines)
-
-  return shuffledPlayers
+function players.setup(color, sectorIndex, letter, startTime)
+  local player = playerConfigs[color]
+  placeInitBotAndScientist(player, letter, sectorIndex)
+  assignTime(player, startTime)
+  return getObjectFromGUID(player.initSubmarine_GUID)
 end
 
 function players.nextRound()

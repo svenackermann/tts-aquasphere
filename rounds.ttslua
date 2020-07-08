@@ -1,6 +1,14 @@
 rounds = {}
 
-function rounds.next()
+local headquarters_GUID = 'd80f3a'
+
+local function hideButton()
+  local hq = getObjectFromGUID(headquarters_GUID)
+  hq.clearButtons()
+  return hq
+end
+
+local function next()
   local currentRound = rounds.getCurrent()
   if currentRound >= 4 then
     return
@@ -14,6 +22,25 @@ function rounds.next()
   if currentRound >= 3 then
     hideButtons()
   end
+end
+
+function nextRound(obj, color)
+  if headquarters.roundEndReached() then
+    next()
+  else
+    broadcastToColor(msg.roundNotEnded, color, Color.Red)
+  end
+end
+
+function rounds.showNextButton()
+  local hq = hideButton()
+  hq.createButton({
+    click_function = 'nextRound',
+    label          = msg.btn.nextRound,
+    position       = {2.9, 0, -1.5},
+    height         = 300,
+    width          = 500
+  })
 end
 
 function rounds.getCurrent()
