@@ -152,7 +152,7 @@ function scoring.showButtons()
   card.createButton({
     click_function = 'intermediateScoring',
     label          = msg.btn.intermediateScoring,
-    position       = {2.5, 2, -5},
+    position       = {2.5, 2, -2.5},
     height         = 800,
     width          = 2500,
     font_size      = 300
@@ -160,7 +160,7 @@ function scoring.showButtons()
   card.createButton({
     click_function = 'finalScoring',
     label          = msg.btn.finalScoring,
-    position       = {2.5, 2, -3},
+    position       = {2.5, 2, 2.5},
     height         = 800,
     width          = 2500,
     font_size      = 300

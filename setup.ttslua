@@ -115,15 +115,15 @@ local function setupGame(colors)
 end
 
 function setupGame2Players()
-  setupGame({'Yellow', 'Red'})
+  setupGame({'White', 'Blue'})
 end
 
 function setupGame3Players()
-  setupGame({'Yellow', 'Red', 'White'})
+  setupGame({'White', 'Blue', 'Yellow'})
 end
 
 function setupGame4Players()
-  setupGame({'Yellow', 'Red', 'White', 'Blue'})
+  setupGame({'White', 'Blue', 'Yellow', 'Red'})
 end
 
 function setupGameSeatedPlayers(obj, color)
@@ -140,7 +140,7 @@ function setup.showButtons()
   card.createButton({
     click_function = 'setupGameSeatedPlayers',
     label          = msg.btn.setupGameSeatedPlayers,
-    position       = {0, 2, -3},
+    position       = {0, 2, -2.5},
     height         = 700,
     width          = 3100,
     font_size      = 300

@@ -48,18 +48,7 @@ function rounds.showButton()
   hq.createButton({
     click_function = 'endRound',
     label          = msg.btn.endRound,
-    position       = {2.9, 0, -1.5},
-    height         = 300,
-    width          = 500
-  })
-end
-
-function rounds.showNextButton()
-  local hq = hideButton()
-  hq.createButton({
-    click_function = 'nextRound',
-    label          = msg.btn.nextRound,
-    position       = {2.9, 0, -1.5},
+    position       = {-2.9, 0, 1.5},
     height         = 300,
     width          = 500
   })
