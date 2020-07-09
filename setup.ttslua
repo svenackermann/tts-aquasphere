@@ -28,7 +28,6 @@ local function placeGreyBot(sectorIndex, remainingBaseLabs)
   if remainingBaseLabs == 3 then
     local bot = supply.takeFast('greyBot')
     station.placeBotToLoad(sectorIndex, bot)
-    bot.setLock(true)
   end
 end
 

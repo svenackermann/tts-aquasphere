@@ -43,7 +43,7 @@ local sectorZones = {
     octopod = 'd633eb',
     crystal = '7afdf8',
     control = '702e31',
-    loadingStations = {'5ff1d9'}
+    loadingStations = {'5ff1d9', '8e2966', '06ea3b', 'b6cc9b', '3bbaf9'}
   },
   {
     submarines = {'58ccec', 'e898aa', 'eba5d1', 'a37acd'},
@@ -51,7 +51,7 @@ local sectorZones = {
     octopod = '0889ed',
     crystal = 'c9acd1',
     control = 'ac69a7',
-    loadingStations = {'a98469'}
+    loadingStations = {'a98469', '00b4ad', 'ac94d7', 'e28922', 'a92be7'}
   },
   {
     submarines = {'f74218', '5d74f7', '67ab90', '4c9bce'},
@@ -59,7 +59,7 @@ local sectorZones = {
     octopod = 'e67669',
     crystal = '5f836a',
     control = '57ab7e',
-    loadingStations = {'5b78be'}
+    loadingStations = {'5b78be', '316696', 'f403d1', 'f039db', 'd9e14b'}
   },
   {
     submarines = {'4c6dce', '0cacd2', '414109', '602f03'},
@@ -67,7 +67,7 @@ local sectorZones = {
     octopod = '73f7d9',
     crystal = '7db834',
     control = '3b3c6d',
-    loadingStations = {'7f898b'}
+    loadingStations = {'7f898b', '152f89', '60eb42', '16d743', 'd7460f'}
   },
   {
     submarines = {'eb704f', '3d533b', '6a723f', '620aec'},
@@ -75,7 +75,7 @@ local sectorZones = {
     octopod = 'a2141a',
     crystal = '8d4a78',
     control = '5d10d4',
-    loadingStations = {'881c87'}
+    loadingStations = {'881c87', 'de160a', '07e1f2', 'bcab8a', 'eaa429'}
   },
   {
     submarines = {'90bbc8', 'bcbeb5', 'aa3206', '71dafb'},
@@ -83,7 +83,7 @@ local sectorZones = {
     octopod = '856985',
     crystal = '29812b',
     control = '671044',
-    loadingStations = {'741281'}
+    loadingStations = {'741281', '9d438f', '9c0549', 'b0f2b8', '6a0d62'}
   }
 }
 
@@ -173,9 +173,65 @@ function station.placeSubmarines(sectorIndices, submarines)
   end
 end
 
+local function getBotsInLoadingStation(sectorIndex)
+  local botsInLoadingStation = {}
+  local existingBots = 0
+  local firstFreeStation = 0
+  for i, loadingStation_GUID in ipairs(sectorZones[sectorIndex].loadingStations) do
+    local bots = gmtools.getObjectsFromZone(loadingStation_GUID, {type = 'bot'})
+    if #bots > 0 then
+      existingBots = existingBots + 1
+    elseif firstFreeStation == 0 then
+      firstFreeStation = i
+    end
+    table.insert(botsInLoadingStation, {bot = bots[1], station = i})
+  end
+  return botsInLoadingStation, existingBots, firstFreeStation
+end
+
+local function returnBotsToPlayers(botsWithStation)
+  local botsToReturn = {}
+  local firstFreeStation = 0
+  for _, botWithStation in ipairs(botsWithStation) do
+    local bot = botWithStation.bot
+    local station = botWithStation.station
+    if bot then
+      local color = gmtools.parse(bot).color
+      if botsToReturn[color] == nil then
+        --one bot per color can stay
+        botsToReturn[color] = {}
+      else
+        if firstFreeStation == 0 then
+          -- first station becomes free
+          firstFreeStation = station
+        end
+        table.insert(botsToReturn[color], bot)
+      end
+    elseif firstFreeStation == 0 then
+      -- first station is already free
+      firstFreeStation = station
+    end
+  end
+  for color, bots in pairs(botsToReturn) do
+    if #bots > 0 then
+      players.returnBots(color, bots)
+    end
+  end
+  return firstFreeStation
+end
+
 function station.placeBotToLoad(sectorIndex, bot)
-  -- TODO works only for first bot currently
-  local zone_GUID = sectorZones[sectorIndex].loadingStations[1]
+  bot.setLock(true)
+  local botsWithStation, existingBots, firstFreeStation = getBotsInLoadingStation(sectorIndex)
+  local maxBots = math.min((playerCount - 1) * 2, 5)
+  if existingBots >= maxBots then
+    broadcastToAll(msg.loadingStationFull, Color.Green)
+    table.insert(botsWithStation, 1, {bot = bot, station = 0})
+    firstFreeStation = returnBotsToPlayers(botsWithStation)
+    -- the new bot can now be placed
+  end
+
+  local zone_GUID = sectorZones[sectorIndex].loadingStations[firstFreeStation]
   local zone = getObjectFromGUID(zone_GUID)
   local pos = zone.getPosition()
   pos.y = 1.59

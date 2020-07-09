@@ -160,3 +160,19 @@ function players.showTimeButtons()
     })
   end
 end
+
+function players.returnBots(color, bots)
+  local placedBots = players.countPlacedBots(color)
+  local board = getObjectFromGUID(playerConfigs[color].board_GUID)
+  for _, bot in ipairs(bots) do
+    local xPos = 1.23 - math.floor((placedBots - 1) / 2) * 0.26
+    local zPos = 0.31 - (placedBots % 2) * 0.22
+    local pos = board.positionToWorld({xPos, 0.6, zPos})
+    bot.setPositionSmooth(pos, false)
+    bot.setRotationSmooth({0, board.getRotation().y + 90, 0}, false)
+
+    local unlock = function() bot.setLock(false) end
+    Wait.condition(unlock, function() return not bot.isSmoothMoving() end, 3, unlock)
+    placedBots = placedBots - 1
+  end
+end
