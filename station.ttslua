@@ -272,3 +272,5 @@ function station.nextRound()
   dealResearchCards()
   dealLabExpansions()
 end
+
+#include <controlBotMovement>
