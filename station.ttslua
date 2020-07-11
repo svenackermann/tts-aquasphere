@@ -257,6 +257,8 @@ function station.countOctopods(sectorIndex)
   return gmtools.countStackableObjectsInZone(zone_GUID, {type = 'octopod'})
 end
 
+#include <controlBotMovement>
+
 function station.setup(sectors)
   for i, letter in ipairs(sectors) do
     local sector = getObjectFromGUID(sector_GUIDs[letter])
@@ -266,11 +268,10 @@ function station.setup(sectors)
 
   dealResearchCards()
   dealLabExpansions()
+  enableControlBotMovement(sectorZones)
 end
 
 function station.nextRound()
   dealResearchCards()
   dealLabExpansions()
 end
-
-#include <controlBotMovement>

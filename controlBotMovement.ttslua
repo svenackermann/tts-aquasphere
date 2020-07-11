@@ -1,8 +1,4 @@
 local controlZones = {}
-for i, sector in ipairs(sectorZones) do
-  controlZones[sector.control] = i
-end
-
 local controlBotEvents = {}
 
 local function checkBotEvents()
@@ -83,5 +79,11 @@ function onObjectDrop(player_color, dropped_object)
         station.placeBotToLoad(controlZones[zone_GUID], event.oldBot)
       end
     end
+  end
+end
+
+function enableControlBotMovement(sectorZones)
+  for i, sector in ipairs(sectorZones) do
+    controlZones[sector.control] = i
   end
 end
