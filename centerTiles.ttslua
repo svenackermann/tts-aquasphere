@@ -96,7 +96,7 @@ function centerTiles.setup()
 end
 
 function centerTiles.getPlaced()
-  return gmtools.getObjectsFromZone(centerTilesScriptingZone_GUID, {type = 'centerTile'})
+  return gmtools.getObjectsByType(centerTilesScriptingZone_GUID, 'centerTile')
 end
 
 local function placeSubmarines(submarineSectors)

@@ -106,7 +106,7 @@ end
 function players.nextRound()
   for _, color in ipairs(Player.getAvailableColors()) do
     local player = playerConfigs[color]
-    local times = gmtools.getObjectsFromZone(player.timeProgramZone_GUID, {type = 'time'})
+    local times = gmtools.getObjectsByType(player.timeProgramZone_GUID, 'time')
     for _, time in ipairs(times) do
       time.destruct()
     end
@@ -115,11 +115,11 @@ function players.nextRound()
 end
 
 function players.countPlacedSubmarines(color)
-  return 6 - #gmtools.getObjectsFromZone(playerConfigs[color].botSubsSupplyZone_GUID, {type = 'submarine'})
+  return 6 - #gmtools.getObjectsByType(playerConfigs[color].botSubsSupplyZone_GUID, 'submarine')
 end
 
 function players.countPlacedBots(color)
-  return 14 - #gmtools.getObjectsFromZone(playerConfigs[color].botSubsSupplyZone_GUID, {type = 'bot'})
+  return 14 - #gmtools.getObjectsByType(playerConfigs[color].botSubsSupplyZone_GUID, 'bot')
 end
 
 function players.countCrystals(color)

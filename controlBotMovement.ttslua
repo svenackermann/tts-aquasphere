@@ -11,7 +11,7 @@ local function checkBotEvents()
     local objConfig = gmtools.parse(event.enter_object)
     if objConfig and objConfig.type == 'bot' then
       local newBot = event.enter_object
-      local bots = gmtools.getObjectsFromZone(zone_GUID, {type = 'bot'})
+      local bots = gmtools.getObjectsByType(zone_GUID, 'bot')
       local oldBot = bots[1]
       if oldBot == newBot then
         oldBot = bots[2]
