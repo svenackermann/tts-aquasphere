@@ -10,20 +10,25 @@ local container_GUIDs = {
   centerTile = '478ccc',
   greySubmarine = '5234d5',
   greyBot = 'c2a84e',
-  programCard = 'd05ff3'
+  programCard = '84af6a'
 }
 
+local function getContainer(type)
+  return getObjectFromGUID(container_GUIDs[type])
+end
+
 function supply.shuffle()
-  getObjectFromGUID(container_GUIDs.labExpansion).shuffle()
-  getObjectFromGUID(container_GUIDs.researchCard).shuffle()
-  getObjectFromGUID(container_GUIDs.baseLab).shuffle()
-  getObjectFromGUID(container_GUIDs.programCard).shuffle()
+  getContainer('labExpansion').shuffle()
+  getContainer('researchCard').shuffle()
+  getContainer('baseLab').shuffle()
+  getContainer('programCard').shuffle()
 end
 
 local function takeObject(type, params)
-  local container = getObjectFromGUID(container_GUIDs[type])
-  return container.takeObject(params)
+  return getContainer(type).takeObject(params)
 end
+
+supply.getContainer = getContainer
 
 function supply.take(type, position, rotation)
   return takeObject(type, {
@@ -32,8 +37,12 @@ function supply.take(type, position, rotation)
   })
 end
 
-function supply.takeFast(type)
-  return takeObject(type, {smooth = false})
+function supply.takeFast(type, position, rotation)
+  return takeObject(type, {
+    position = position,
+    rotation = rotation,
+    smooth = false
+  })
 end
 
 function supply.takeAndThen(type, position, rotation, callback)
@@ -45,15 +54,15 @@ function supply.takeAndThen(type, position, rotation, callback)
 end
 
 function supply.put(type, obj)
-  getObjectFromGUID(container_GUIDs[type]).putObject(obj)
+  getContainer(type).putObject(obj)
 end
 
 function supply.getContent(type)
-  return getObjectFromGUID(container_GUIDs[type]).getObjects()
+  return getContainer(type).getObjects()
 end
 
 function supply.takeCenterTile(noPlayers, round, position, rotation)
-  local centerTilesBag = getObjectFromGUID(container_GUIDs.centerTile)
+  local centerTilesBag = getContainer('centerTile')
   for _, centerTile in ipairs(centerTilesBag.getObjects()) do
     local ctType = gmtools.parseGmNotes(centerTile.gm_notes)
     if ctType.players == noPlayers and ctType.round == round then

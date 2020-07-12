@@ -136,7 +136,10 @@ end
 
 local function dealProgramCard(callback)
   local pos = getObjectFromGUID(nextProgramCardZone_GUID).getPosition()
-  supply.takeAndThen('programCard', pos, {0, 180, math.random(0, 1) * 180}, callback)
+  local card = supply.takeFast('programCard', pos, {0, 180, math.random(0, 1) * 180})
+  if callback then
+    Wait.condition(callback, function() return card.resting end)
+  end
 end
 
 local function applyProgramCard(callback)
@@ -164,6 +167,10 @@ local function applyProgramCard(callback)
 end
 
 function headquarters.setup(colors)
+  local programCardsDeck = supply.getContainer('programCard')
+  programCardsDeck.setLock(true)
+  programCardsDeck.setPosition({-50, -4, 4})
+
   dealProgramCard(function() applyProgramCard(dealProgramCard) end)
   for i, color in ipairs(colors) do
     local figures = playerFigures[color]
