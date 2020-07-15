@@ -107,8 +107,9 @@ local function setupGame(colors)
   centerTiles.setup()
   turns.setup(colors)
   headquarters.setup(colors)
-  msg.broadcastStartPlayer(colors[1])
+  broadcastToAll(msg.startPlayer:format(messages.getPlayerName(colors[1])), Color.fromString(colors[1]))
 
+  i18n.hideUI()
   rounds.showButton()
   scoring.showButtons()
 end
@@ -136,6 +137,7 @@ end
 
 function setup.showButtons()
   local card = getObjectFromGUID(setup3PlayersCard_GUID)
+  card.clearButtons()
   card.createButton({
     click_function = 'setupGameSeatedPlayers',
     label          = msg.btn.setupGameSeatedPlayers,
@@ -169,3 +171,5 @@ function setup.showButtons()
     font_size      = 300
   })
 end
+
+i18n.registerForLanguageChange(setup.showButtons)

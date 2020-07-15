@@ -1,5 +1,6 @@
 playerCount = 0
 
+#include <utils/i18n>
 #include <messages>
 #include <utils/gmNotesTools>
 #include <supply>
@@ -13,14 +14,31 @@ playerCount = 0
 #include <scoring>
 #include <setup>
 
-function onLoad()
+function onLoad(save_state)
+  local language
+  if save_state ~= '' then
+    local state = JSON.decode(save_state)
+    language = state.language
+  end
+  messages.setup(language)
+
   local currentRound = rounds.getCurrent()
   if currentRound == 0 then
     setup.showButtons()
     scoring.hide()
   else
     playerCount = #headquarters.getActivePlayers()
+    i18n.hideUI()
     rounds.showButton()
     scoring.showButtons()
   end
+end
+
+function onSave()
+  local defLang = i18n.getDefaultLanguage()
+  local lang = i18n.getLanguage()
+  if defLang == lang then
+    return ''
+  end
+  return JSON.encode({language = lang})
 end

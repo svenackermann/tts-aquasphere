@@ -10,7 +10,13 @@ local container_GUIDs = {
   centerTile = '478ccc',
   greySubmarine = '5234d5',
   greyBot = 'c2a84e',
-  programCard = '84af6a'
+  programCard = '84af6a',
+  rules = '6f8c35'
+}
+
+local rulebook_GUIDs = {
+  de = '2f2eea',
+  en = 'cc12f5'
 }
 
 local function getContainer(type)
@@ -74,3 +80,38 @@ function supply.takeCenterTile(noPlayers, round, position, rotation)
     end
   end
 end
+
+local function languageChanged(lang)
+  for type, name in pairs(msg.supply) do
+    getContainer(type).setName(name)
+  end
+  local rulebook_GUID = rulebook_GUIDs[lang]
+  if not rulebook_GUID then
+    rulebook_GUID = rulebook_GUIDs.en
+  end
+  local rulebook = getObjectFromGUID(rulebook_GUID)
+  if not rulebook then
+    local rulesBag = getContainer('rules')
+    local pos = {49.29, 0.96, 10.13}
+    local rot = {0.00, 180.00, 0.00}
+    for key, guid in pairs(rulebook_GUIDs) do
+      if key ~= lang then
+        local rb = getObjectFromGUID(guid)
+        if rb then
+          pos = rb.getPosition()
+          rot = rb.getRotation()
+          rb.setLock(false)
+          rulesBag.putObject(rb)
+        end
+      end
+    end
+    rulesBag.takeObject({
+      position = pos,
+      rotation = rot,
+      guid     = rulebook_GUID,
+      smooth   = false
+    }).setLock(true)
+  end
+
+end
+i18n.registerForLanguageChange(languageChanged)

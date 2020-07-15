@@ -38,7 +38,7 @@ function onPlayerTurnEnd()
       if not passed[activePlayer] then
         table.insert(newOrder, activePlayer)
       elseif curOrder[activePlayer] then
-        msg.broadcastPlayerRoundEnd(activePlayer)
+        broadcastToAll(msg.playerEndRound:format(messages.getPlayerName(activePlayer)), Color.fromString(activePlayer))
       end
     end
     Turns.order = newOrder

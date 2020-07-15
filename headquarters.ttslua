@@ -198,3 +198,14 @@ function headquarters.nextRound(lastRound)
   end
   Wait.condition(enableTurns, function() return not lastEngineer.isSmoothMoving() end, 3, enableTurns)
 end
+
+local function languageChanged(lang)
+  for _, guid in pairs(programTiles_GUIDs) do
+    getObjectFromGUID(guid).setName(msg.programTile)
+  end
+  for _, player in pairs(playerFigures) do
+    getObjectFromGUID(player.engineer_GUID).setName(msg.engineer)
+    getObjectFromGUID(player.orderBot_GUID).setName(msg.orderBot)
+  end
+end
+i18n.registerForLanguageChange(languageChanged)

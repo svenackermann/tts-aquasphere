@@ -104,8 +104,7 @@ local function hideTimeButton(player)
 end
 
 function players.nextRound()
-  for _, color in ipairs(Player.getAvailableColors()) do
-    local player = playerConfigs[color]
+  for _, player in pairs(playerConfigs) do
     local times = gmtools.getObjectsByType(player.timeProgramZone_GUID, 'time')
     for _, time in ipairs(times) do
       time.destruct()
@@ -176,3 +175,10 @@ function players.returnBots(color, bots)
     placedBots = placedBots - 1
   end
 end
+
+local function languageChanged(lang)
+  for _, player in pairs(playerConfigs) do
+    getObjectFromGUID(player.scientist_GUID).setName(msg.scientist)
+  end
+end
+i18n.registerForLanguageChange(languageChanged)

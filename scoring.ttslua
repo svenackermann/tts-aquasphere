@@ -81,7 +81,7 @@ local function displayScoring(msgKey, params, color)
   end
   table.insert(params, total)
   local scoringCard = getObjectFromGUID(scoringCard_GUIDs[color])
-  scoringCard.setName(msg[msgKey .. 'Title']:format(msg.getPlayerName(color)))
+  scoringCard.setName(msg[msgKey .. 'Title']:format(messages.getPlayerName(color)))
   scoringCard.setDescription(string.format(msg[msgKey], table.unpack(params)))
   scoringCard.setInvisibleTo({})
 end
@@ -154,7 +154,7 @@ function scoring.showButtons()
     label          = msg.btn.intermediateScoring,
     position       = {2.5, 2, -2.5},
     height         = 800,
-    width          = 2500,
+    width          = 2800,
     font_size      = 300
   })
   card.createButton({
@@ -162,7 +162,7 @@ function scoring.showButtons()
     label          = msg.btn.finalScoring,
     position       = {2.5, 2, 2.5},
     height         = 800,
-    width          = 2500,
+    width          = 2800,
     font_size      = 300
   })
 end

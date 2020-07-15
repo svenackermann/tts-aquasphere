@@ -1,28 +1,34 @@
-msg = {
-  btn = {
-    setupGameSeatedPlayers = 'Start mit\nanwesenden Spielern',
-    start = 'Start',
-    endRound = 'Runde\nbeenden',
-    nextRound = 'nächste\nRunde',
-    intermediateScoring = 'Zwischenwertung',
-    finalScoring = 'Schlusswertung',
-    takeTime = 'Zeit nehmen'
-  },
-  color = {
-    Red = 'Rot',
-    White = 'Weiß',
-    Blue = 'Blau',
-    Yellow = 'Gelb'
-  },
-  atLeast2Players = 'Geht nur bei mindestens zwei anwesenden Spielern',
-  roundNotEnded = 'Es haben noch nicht alle Spieler die Runde beendet.',
-  startPlayer = 'Ausgeloster Startspieler: %s',
-  roundEnd = 'Jetzt jeder Forschungskarten vom Typ || anwenden, Zeitmarker für platzierte U-Boote nehmen und die Zwischenwertung durchführen, dann die nächste Runde starten',
-  lastRoundEnd = 'Jetzt jeder Forschungskarten vom Typ || anwenden, Zeitmarker für platzierte U-Boote nehmen, Zwischenwertung und Schlusswertung durchführen',
-  playerEndRound = 'Spieler %s hat die Runde beendet.',
-  loadingStationFull = 'Die Ladestation ist voll, Bots gehen zurück an die Spieler.',
-  scoringIntermediateTitle = 'Zwischenwertung für %s',
-  scoringIntermediate = [[
+messages = {}
+
+local languages = {
+  {
+    key = 'de',
+    name = 'Deutsch',
+    msg = {
+      btn = {
+        setupGameSeatedPlayers = 'Start mit\nanwesenden Spielern',
+        start = 'Start',
+        endRound = 'Runde\nbeenden',
+        nextRound = 'nächste\nRunde',
+        intermediateScoring = 'Zwischenwertung',
+        finalScoring = 'Schlusswertung',
+        takeTime = 'Zeit nehmen'
+      },
+      color = {
+        Red = 'Rot',
+        White = 'Weiß',
+        Blue = 'Blau',
+        Yellow = 'Gelb'
+      },
+      atLeast2Players = 'Geht nur bei mindestens zwei anwesenden Spielern',
+      roundNotEnded = 'Es haben noch nicht alle Spieler die Runde beendet.',
+      startPlayer = 'Ausgeloster Startspieler: %s',
+      roundEnd = 'Jetzt jeder Forschungskarten vom Typ || anwenden, Zeitmarker für platzierte U-Boote nehmen und die Zwischenwertung durchführen, dann die nächste Runde starten',
+      lastRoundEnd = 'Jetzt jeder Forschungskarten vom Typ || anwenden, Zeitmarker für platzierte U-Boote nehmen, Zwischenwertung und Schlusswertung durchführen',
+      playerEndRound = 'Spieler %s hat die Runde beendet.',
+      loadingStationFull = 'Die Ladestation ist voll, Bots gehen zurück an die Spieler.',
+      scoringIntermediateTitle = 'Zwischenwertung für %s',
+      scoringIntermediate = [[
 Mehrheit Kontrollfelder: %d
 eingesetzte Bots: %d
 Kristalle im Vorrat: %d
@@ -30,30 +36,109 @@ nicht gefangene Oktopoden: %d
 
 [u][b]Summe: %d[/b][/u]
 ]],
-  scoringFinalTitle = 'Schlusswertung für %s',
-  scoringFinal = [[
+    scoringFinalTitle = 'Schlusswertung für %s',
+    scoringFinal = [[
 Buchstaben im Labor: %d
 Zeitmarker im Vorrat: %d
 alle U-Boote eingesetzt: %d
 Labor vollständig: %d
 
 [u][b]Summe: %d[/b][/u]
-]]
+]],
+      supply = {
+        labExpansion = 'Laborausbauten',
+        researchCard = 'Forschungskarten',
+        time = 'Zeitmarker',
+        crystal = 'Kristalle',
+        octopod = 'Oktopoden',
+        baseLab = 'Basislabore',
+        centerTile = 'Zentrumsplättchen',
+        greySubmarine = 'neutrale U-Boote',
+        greyBot = 'neutrale Bots',
+        programCard = 'Programmkarten',
+        rules = 'Regeln'
+      },
+      scientist = 'Wissenschaftler',
+      programTile = 'Programmierplättchen',
+      engineer = 'Ingenieur',
+      orderBot = 'Bot für Zugreihenfolge'
+    }
+  },
+  {
+    key = 'en',
+    name = 'English',
+    msg = {
+      btn = {
+        setupGameSeatedPlayers = 'Start with\nseated players',
+        start = 'Start',
+        endRound = 'finish\nround',
+        nextRound = 'next\nround',
+        intermediateScoring = 'intermediate scoring',
+        finalScoring = 'final scoring',
+        takeTime = 'take time'
+      },
+      color = {
+        Red = 'Red',
+        White = 'White',
+        Blue = 'Blue',
+        Yellow = 'Yellow'
+      },
+      atLeast2Players = 'Only possible with at least 2 seated players',
+      roundNotEnded = 'Not all players have finished their ound yet.',
+      startPlayer = 'drawn start player: %s',
+      roundEnd = 'now everybody apply research cards of type ||, take time markers for placed submarines and do an intermediate scoring, then start next round',
+      lastRoundEnd = 'now everybody apply research cards of type ||, take time markers for placed submarines and do an intermediate and final scoring',
+      playerEndRound = 'Player %s finished this round.',
+      loadingStationFull = 'The loading station is full, bots return to their players.',
+      scoringIntermediateTitle = 'Intermediate scoring for %s',
+      scoringIntermediate = [[
+Majority on the control spaces: %d
+Bots in play: %d
+Crystals in supply: %d
+Leftover Octopods: %d
+
+[u][b]Total: %d[/b][/u]
+]],
+    scoringFinalTitle = 'Final scoring for %s',
+    scoringFinal = [[
+Letters in lab: %d
+Time markers in supply: %d
+Placed all submarines: %d
+Lab completed: %d
+
+[u][b]Total: %d[/b][/u]
+]],
+      supply = {
+        labExpansion = 'lab expansions',
+        researchCard = 'research cards',
+        time = 'time markers',
+        crystal = 'crystals',
+        octopod = 'octopods',
+        baseLab = 'base labs',
+        centerTile = 'center tiles',
+        greySubmarine = 'neutral submarines',
+        greyBot = 'neutral bots',
+        programCard = 'program cards',
+        rules = 'rulebooks'
+      },
+      scientist = 'scientist',
+      programTile = 'programming tile',
+      engineer = 'engineer',
+      orderBot = 'bot for turn order'
+    }
+  }
 }
 
-function msg.getPlayerName(color)
+function messages.setup(lang)
+  lang = lang or 'de'
+  i18n.setupLanguages(languages, lang)
+end
+
+function messages.getPlayerName(color)
   local player = Player[color]
   if player.seated then
     return player.steam_name
   else
     return msg.color[color]
   end
-end
-
-function msg.broadcastStartPlayer(color)
-  broadcastToAll(msg.startPlayer:format(msg.getPlayerName(color)), Color.fromString(color))
-end
-
-function msg.broadcastPlayerRoundEnd(color)
-  broadcastToAll(msg.playerEndRound:format(msg.getPlayerName(color)), Color.fromString(color))
 end
