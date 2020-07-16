@@ -105,7 +105,7 @@ end
 
 function players.nextRound()
   for _, player in pairs(playerConfigs) do
-    local times = gmtools.getObjectsByType(player.timeProgramZone_GUID, 'time')
+    local times = getObjectsByType(player.timeProgramZone_GUID, 'time')
     for _, time in ipairs(times) do
       time.destruct()
     end
@@ -114,24 +114,24 @@ function players.nextRound()
 end
 
 function players.countPlacedSubmarines(color)
-  return 6 - #gmtools.getObjectsByType(playerConfigs[color].botSubsSupplyZone_GUID, 'submarine')
+  return 6 - #getObjectsByType(playerConfigs[color].botSubsSupplyZone_GUID, 'submarine')
 end
 
 function players.countPlacedBots(color)
-  return 14 - #gmtools.getObjectsByType(playerConfigs[color].botSubsSupplyZone_GUID, 'bot')
+  return 14 - #getObjectsByType(playerConfigs[color].botSubsSupplyZone_GUID, 'bot')
 end
 
 function players.countCrystals(color)
-  return gmtools.countStackableObjectsInZone(playerConfigs[color].crystalsZone_GUID, {type = 'crystal'})
+  return countStackableObjectsByType(playerConfigs[color].crystalsZone_GUID, 'crystal')
 end
 
 function players.countTime(color)
-  return gmtools.countStackableObjectsInZone(playerConfigs[color].timeZone_GUID, {type = 'time'})
+  return countStackableObjectsByType(playerConfigs[color].timeZone_GUID, 'time')
 end
 
 local function assignTimeWithCapacity(color, amount)
   local capacity = labs.getCapacities(color).time
-  local existing = gmtools.countStackableObjectsInZone(playerConfigs[color].timeZone_GUID, {type = 'time'})
+  local existing = countStackableObjectsByType(playerConfigs[color].timeZone_GUID, 'time')
   local count = math.min(capacity - existing, amount)
   if count > 0 then
     assignTime(playerConfigs[color], count)

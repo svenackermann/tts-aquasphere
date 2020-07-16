@@ -1,8 +1,18 @@
+#include <utils/i18n>
+#include <utils/scriptingZones>
+#include <utils/gmNotesTools>
+
+function getObjectsByType(zone_GUID, type)
+  return sZones.getObjects(zone_GUID, gmtools.filter({type = type}))
+end
+
+function countStackableObjectsByType(zone_GUID, type)
+  return sZones.countStackableObjects(zone_GUID, gmtools.filter({type = type}))
+end
+
 playerCount = 0
 
-#include <utils/i18n>
 #include <messages>
-#include <utils/gmNotesTools>
 #include <supply>
 #include <players>
 #include <labs>

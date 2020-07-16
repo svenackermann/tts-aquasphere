@@ -122,7 +122,7 @@ function station.placeTime(sectorIndex, count)
 end
 
 function station.removeTime(sectorIndex)
-  local times = gmtools.getObjectsByType(sectorZones[sectorIndex].time, 'time')
+  local times = getObjectsByType(sectorZones[sectorIndex].time, 'time')
   for _, time in ipairs(times) do
     time.destruct()
   end
@@ -134,7 +134,7 @@ local function findZoneForSubmarine(sectorIndex, submarine, zoneSubs)
   -- in 2 player mode we have 2 neutral colors, but here both are Grey
   local anotherAllowed = color == 'Grey' and playerCount == 2
   for i, zone_GUID in ipairs(zones) do
-    local subsInZone = gmtools.getObjectsByType(zone_GUID, 'submarine')
+    local subsInZone = getObjectsByType(zone_GUID, 'submarine')
     if #subsInZone == 0 then
       zoneSubs[zone_GUID] = submarine
       return true
@@ -178,7 +178,7 @@ local function getBotsInLoadingStation(sectorIndex)
   local existingBots = 0
   local firstFreeStation = 0
   for i, loadingStation_GUID in ipairs(sectorZones[sectorIndex].loadingStations) do
-    local bots = gmtools.getObjectsByType(loadingStation_GUID, 'bot')
+    local bots = getObjectsByType(loadingStation_GUID, 'bot')
     if #bots > 0 then
       existingBots = existingBots + 1
     elseif firstFreeStation == 0 then
@@ -242,7 +242,7 @@ end
 function station.getControlBots()
   local controlBots = {}
   for i, sector in ipairs(sectorZones) do
-    local bots = gmtools.getObjectsByType(sector.control, 'bot')
+    local bots = getObjectsByType(sector.control, 'bot')
     local bot = false
     if #bots > 0 then
       bot = bots[1]
@@ -254,7 +254,7 @@ end
 
 function station.countOctopods(sectorIndex)
   local zone_GUID = sectorZones[sectorIndex].octopod
-  return gmtools.countStackableObjectsInZone(zone_GUID, {type = 'octopod'})
+  return countStackableObjectsByType(zone_GUID, 'octopod')
 end
 
 #include <controlBotMovement>

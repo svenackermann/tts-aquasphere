@@ -4,42 +4,36 @@ local controlBotEvents = {}
 local function checkBotEvents()
   for zone_GUID, event in pairs(controlBotEvents) do
     event.timer = nil
-    local objConfig = gmtools.parse(event.enter_object)
-    if objConfig and objConfig.type == 'bot' then
-      local newBot = event.enter_object
-      local bots = gmtools.getObjectsByType(zone_GUID, 'bot')
-      local oldBot = bots[1]
-      if oldBot == newBot then
-        oldBot = bots[2]
-      end
-      if oldBot then
-        event.oldBot = oldBot
-        event.newBot = newBot
-        local zone = getObjectFromGUID(zone_GUID)
-        local tempPos = zone.positionToWorld({0, 0, -1})
-        tempPos.y = 1.6
-        oldBot.setPositionSmooth(tempPos, false)
-        oldBot.setRotation(zone.getRotation())
-        if event.dropped then
-          -- the less likely case that the new bot is already dropped
-          controlBotEvents[zone_GUID] = nil
-          station.placeBotToLoad(controlZones[zone_GUID], oldBot)
-        end
-      else
-        -- first bot entered
+    local newBot = event.enter_object
+    local bots = getObjectsByType(zone_GUID, 'bot')
+    local oldBot = bots[1]
+    if oldBot == newBot then
+      oldBot = bots[2]
+    end
+    if oldBot then
+      event.oldBot = oldBot
+      event.newBot = newBot
+      local zone = getObjectFromGUID(zone_GUID)
+      local tempPos = zone.positionToWorld({0, 0, -1})
+      tempPos.y = 1.6
+      oldBot.setPositionSmooth(tempPos, false)
+      oldBot.setRotation(zone.getRotation())
+      if event.dropped then
+        -- the less likely case that the new bot is already dropped
         controlBotEvents[zone_GUID] = nil
+        station.placeBotToLoad(controlZones[zone_GUID], oldBot)
       end
     else
-      -- non-bot entered
+      -- first bot entered
       controlBotEvents[zone_GUID] = nil
     end
   end
 end
 
---global event
-function onObjectEnterScriptingZone(zone, enter_object)
-  local zone_GUID = zone.getGUID()
-  if controlZones[zone_GUID] then
+local function onObjectEnterControlZone(enter_object, zone)
+  local objConfig = gmtools.parse(enter_object)
+  if objConfig and objConfig.type == 'bot' then
+    local zone_GUID = zone.getGUID()
     controlBotEvents[zone_GUID] = {
       enter_object = enter_object,
       timer = Wait.time(checkBotEvents, 0.2)
@@ -47,8 +41,7 @@ function onObjectEnterScriptingZone(zone, enter_object)
   end
 end
 
---global event
-function onObjectLeaveScriptingZone(zone, leave_object)
+local function onObjectLeaveControlZone(leave_object, zone)
   local zone_GUID = zone.getGUID()
   local event = controlBotEvents[zone_GUID]
   if event and event.enter_object == leave_object then
@@ -85,5 +78,6 @@ end
 function enableControlBotMovement(sectorZones)
   for i, sector in ipairs(sectorZones) do
     controlZones[sector.control] = i
+    sZones.registerZoneEvents(sector.control, onObjectEnterControlZone, onObjectLeaveControlZone)
   end
 end

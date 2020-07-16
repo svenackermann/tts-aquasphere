@@ -97,7 +97,7 @@ local playerFigures = {
 function headquarters.getActivePlayers()
   local result = {}
   for i, zone_GUID in ipairs(turnOrderZones_GUIDs) do
-    local orderBots = gmtools.getObjectsByType(zone_GUID, 'orderBot')
+    local orderBots = getObjectsByType(zone_GUID, 'orderBot')
     if #orderBots > 0 then
       local info = gmtools.parse(orderBots[1])
       table.insert(result, info.color)
@@ -109,7 +109,7 @@ end
 function headquarters.getPassedPlayers()
   local players = {}
   for i, zone_GUID in ipairs(passOrderZones_GUIDs) do
-    local engineers = gmtools.getObjectsByType(zone_GUID, 'engineer')
+    local engineers = getObjectsByType(zone_GUID, 'engineer')
     if #engineers > 0 then
       table.insert(players, gmtools.parse(engineers[1]).color)
     end
@@ -143,7 +143,7 @@ local function dealProgramCard(callback)
 end
 
 local function applyProgramCard(callback)
-  local cards = gmtools.getObjectsByType(nextProgramCardZone_GUID, 'programCard')
+  local cards = getObjectsByType(nextProgramCardZone_GUID, 'programCard')
   local card = cards[1]
   local rotZ = card.getRotation().z
   card.setPositionSmooth({-50, 1.1, -3}, false)
