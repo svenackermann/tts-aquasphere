@@ -34,13 +34,12 @@ function onLoad(save_state)
 
   local currentRound = rounds.getCurrent()
   if currentRound == 0 then
+    i18n.showUI()
     setup.showButtons()
     scoring.hide()
   else
     playerCount = #headquarters.getActivePlayers()
-    i18n.hideUI()
-    rounds.showButton()
-    scoring.showButtons()
+    setup.finished()
   end
 end
 

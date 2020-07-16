@@ -109,9 +109,7 @@ local function setupGame(colors)
   headquarters.setup(colors)
   broadcastToAll(msg.startPlayer:format(messages.getPlayerName(colors[1])), Color.fromString(colors[1]))
 
-  i18n.hideUI()
-  rounds.showButton()
-  scoring.showButtons()
+  setup.finished()
 end
 
 function setupGame2Players()
@@ -135,7 +133,7 @@ function setupGameSeatedPlayers(obj, color)
   end
 end
 
-function setup.showButtons()
+local function renderButtons()
   local card = getObjectFromGUID(setup3PlayersCard_GUID)
   card.clearButtons()
   card.createButton({
@@ -172,4 +170,13 @@ function setup.showButtons()
   })
 end
 
-i18n.registerForLanguageChange(setup.showButtons)
+function setup.showButtons()
+  renderButtons()
+  i18n.registerForLanguageChange(renderButtons)
+end
+
+function setup.finished()
+  i18n.hideUI()
+  rounds.showButton()
+  scoring.showButtons()
+end
