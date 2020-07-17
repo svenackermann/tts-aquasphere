@@ -1,4 +1,6 @@
-local controlZones = {}
+controlBotMovement = {}
+
+local controlZones
 local controlBotEvents = {}
 
 local function checkBotEvents()
@@ -75,9 +77,11 @@ function onObjectDrop(player_color, dropped_object)
   end
 end
 
-function enableControlBotMovement(sectorZones)
-  for i, sector in ipairs(sectorZones) do
-    controlZones[sector.control] = i
-    sZones.registerZoneEvents(sector.control, onObjectEnterControlZone, onObjectLeaveControlZone)
+function controlBotMovement.enable()
+  if controlZones == nil then
+    controlZones = station.getControlZoneIndices()
+    for controlZone_GUID, _ in pairs(controlZones) do
+      sZones.registerZoneEvents(controlZone_GUID, onObjectEnterControlZone, onObjectLeaveControlZone)
+    end
   end
 end

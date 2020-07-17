@@ -257,7 +257,13 @@ function station.countOctopods(sectorIndex)
   return countStackableObjectsByType(zone_GUID, 'octopod')
 end
 
-#include <controlBotMovement>
+function station.getControlZoneIndices()
+  local controlZones = {}
+  for i, sector in ipairs(sectorZones) do
+    controlZones[sector.control] = i
+  end
+  return controlZones
+end
 
 function station.setup(sectors)
   for i, letter in ipairs(sectors) do
@@ -268,7 +274,6 @@ function station.setup(sectors)
 
   dealResearchCards()
   dealLabExpansions()
-  enableControlBotMovement(sectorZones)
 end
 
 function station.nextRound()
