@@ -18,7 +18,7 @@ local sectorPositions = {
   {-8.51, 1.06, 4.74}
 }
 
-local researchCardPositions = {
+local researchPositions = {
   {3.40, 2, 17.62},
   {17.11, 2, 5.76},
   {13.74, 2, -11.95},
@@ -88,8 +88,8 @@ local sectorZones = {
 }
 
 local function dealResearchCards()
-  for i, researchCardPosition in ipairs(researchCardPositions) do
-    supply.take('researchCard', researchCardPosition, {0, i * 60 + 233, 0})
+  for i, researchPosition in ipairs(researchPositions) do
+    supply.take('research', researchPosition, {0, i * 60 + 233, 0})
   end
 end
 

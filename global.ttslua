@@ -39,8 +39,9 @@ function onLoad(save_state)
     setup.showButtons()
     scoring.hide()
   else
-    playerCount = #headquarters.getActivePlayers()
-    setup.finished()
+    local activePlayers = headquarters.getActivePlayers()
+    playerCount = #activePlayers
+    setup.finished(activePlayers)
   end
 end
 

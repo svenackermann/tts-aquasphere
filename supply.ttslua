@@ -2,7 +2,7 @@ supply = {}
 
 local container_GUIDs = {
   labExpansion = '38554f',
-  researchCard = 'b9d782',
+  research = '03e02d',
   time = 'ec8424',
   crystal = 'e3cb69',
   octopod = '612de1',
@@ -25,7 +25,7 @@ end
 
 function supply.shuffle()
   getContainer('labExpansion').shuffle()
-  getContainer('researchCard').shuffle()
+  getContainer('research').shuffle()
   getContainer('baseLab').shuffle()
   getContainer('programCard').shuffle()
 end

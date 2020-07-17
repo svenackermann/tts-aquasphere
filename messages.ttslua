@@ -26,6 +26,7 @@ local languages = {
       roundEnd = 'Jetzt jeder Forschungskarten vom Typ || anwenden, Zeitmarker für platzierte U-Boote nehmen und die Zwischenwertung durchführen, dann die nächste Runde starten',
       lastRoundEnd = 'Jetzt jeder Forschungskarten vom Typ || anwenden, Zeitmarker für platzierte U-Boote nehmen, Zwischenwertung und Schlusswertung durchführen',
       playerEndRound = 'Spieler %s hat die Runde beendet.',
+      capacityExceeded = 'Spieler %s hat die Kapazität für %s überschritten.',
       loadingStationFull = 'Die Ladestation ist voll, Bots gehen zurück an die Spieler.',
       scoringIntermediateTitle = 'Zwischenwertung für %s',
       scoringIntermediate = [[
@@ -47,7 +48,7 @@ Labor vollständig: %d
 ]],
       supply = {
         labExpansion = 'Laborausbauten',
-        researchCard = 'Forschungskarten',
+        research = 'Forschungskarten',
         time = 'Zeitmarker',
         crystal = 'Kristalle',
         octopod = 'Oktopoden',
@@ -89,6 +90,7 @@ Labor vollständig: %d
       roundEnd = 'now everybody apply research cards of type ||, take time markers for placed submarines and do an intermediate scoring, then start next round',
       lastRoundEnd = 'now everybody apply research cards of type ||, take time markers for placed submarines and do an intermediate and final scoring',
       playerEndRound = 'Player %s finished this round.',
+      capacityExceeded = 'Player %s has exceeded the capacity for %s.',
       loadingStationFull = 'The loading station is full, bots return to their players.',
       scoringIntermediateTitle = 'Intermediate scoring for %s',
       scoringIntermediate = [[
@@ -110,7 +112,7 @@ Lab completed: %d
 ]],
       supply = {
         labExpansion = 'lab expansions',
-        researchCard = 'research cards',
+        research = 'research cards',
         time = 'time markers',
         crystal = 'crystals',
         octopod = 'octopods',

@@ -109,7 +109,7 @@ local function setupGame(colors)
   headquarters.setup(colors)
   broadcastToAll(msg.startPlayer:format(messages.getPlayerName(colors[1])), Color.fromString(colors[1]))
 
-  setup.finished()
+  setup.finished(colors)
 end
 
 function setupGame2Players()
@@ -175,9 +175,12 @@ function setup.showButtons()
   i18n.registerForLanguageChange(renderButtons)
 end
 
-function setup.finished()
+function setup.finished(colors)
   i18n.hideUI()
   rounds.showButton()
   scoring.showButtons()
   controlBotMovement.enable()
+  for _, color in ipairs(colors) do
+    players.enableCapacityCheck(color)
+  end
 end
