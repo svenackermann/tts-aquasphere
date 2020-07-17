@@ -166,3 +166,8 @@ function scoring.showButtons()
     font_size      = 300
   })
 end
+
+function scoring.scoreCatchOctopods(color, count)
+  local score = scoringScheme[math.min(count, #scoringScheme)]
+  broadcastToAll(msg.scoreCatchOctopods:format(messages.getPlayerName(color), score, count), Color.fromString(color))
+end

@@ -12,7 +12,8 @@ local languages = {
         nextRound = 'nächste\nRunde',
         intermediateScoring = 'Zwischenwertung',
         finalScoring = 'Schlusswertung',
-        takeTime = 'Zeit nehmen'
+        takeTime = 'Zeit nehmen',
+        catchOctopods = 'fangen'
       },
       color = {
         Red = 'Rot',
@@ -27,6 +28,7 @@ local languages = {
       lastRoundEnd = 'Jetzt jeder Forschungskarten vom Typ || anwenden, Zeitmarker für platzierte U-Boote nehmen, Zwischenwertung und Schlusswertung durchführen',
       playerEndRound = 'Spieler %s hat die Runde beendet.',
       capacityExceeded = 'Spieler %s hat die Kapazität für %s überschritten.',
+      scoreCatchOctopods = 'Spieler %s erhält %d Wissenspunkt(e) für das Fangen von %d Oktopoden.',
       loadingStationFull = 'Die Ladestation ist voll, Bots gehen zurück an die Spieler.',
       scoringIntermediateTitle = 'Zwischenwertung für %s',
       scoringIntermediate = [[
@@ -76,7 +78,8 @@ Labor vollständig: %d
         nextRound = 'next\nround',
         intermediateScoring = 'intermediate scoring',
         finalScoring = 'final scoring',
-        takeTime = 'take time'
+        takeTime = 'take time',
+        catchOctopods = 'catch'
       },
       color = {
         Red = 'Red',
@@ -91,6 +94,7 @@ Labor vollständig: %d
       lastRoundEnd = 'now everybody apply research cards of type ||, take time markers for placed submarines and do an intermediate and final scoring',
       playerEndRound = 'Player %s finished this round.',
       capacityExceeded = 'Player %s has exceeded the capacity for %s.',
+      scoreCatchOctopods = 'Player %s gets %d knowledge point(s) for catching %d octopod(s).',
       loadingStationFull = 'The loading station is full, bots return to their players.',
       scoringIntermediateTitle = 'Intermediate scoring for %s',
       scoringIntermediate = [[
