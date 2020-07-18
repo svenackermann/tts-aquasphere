@@ -87,6 +87,12 @@ local sectorZones = {
   }
 }
 
+local buttonTypeFunctions = {
+  octopod = 'catchOctopods',
+  crystal = 'takeCrystals',
+  time = 'takeTimeMarkers'
+}
+
 local function dealResearchCards()
   for i, researchPosition in ipairs(researchPositions) do
     supply.take('research', researchPosition, {0, i * 60 + 233, 0})
@@ -99,6 +105,126 @@ local function dealLabExpansions()
   end
 end
 
+local function getSectorOfZone(zone, type)
+  for sectorIndex, sector in ipairs(sectorZones) do
+    if sector[type] == zone.getGUID() then
+      return sector, sectorIndex
+    end
+  end
+  return nil
+end
+
+local function getControlColorInSector(zone, type, clickerColor)
+  local sector, sectorIndex = getSectorOfZone(zone, type)
+  if sector then
+    local bots = getObjectsByType(sector.control, 'bot')
+    local controlBot = bots[1]
+    if controlBot == nil then
+      broadcastToColor(msg.noControlBotInSector, clickerColor, Color.Red)
+      return nil
+    end
+    return gmtools.parse(controlBot).color, sectorIndex
+  end
+  return nil
+end
+
+local function takeStackableTokens(tokens, amountToTake, callback)
+  local took = 0
+  for _, token in ipairs(tokens) do
+    local quantity = token.getQuantity()
+    if quantity < 0 then
+      -- not a stack
+      took = took + 1
+      callback(token)
+      if took >= amountToTake then
+        return took
+      end
+    else
+      -- token is actually a stack
+      for i = 1, quantity do
+        took = took + 1
+        token.takeObject({
+          callback_function = callback,
+          smooth            = false
+        })
+        if took >= amountToTake then
+          return took
+        end
+      end
+    end
+  end
+  return took
+end
+
+local function takeTokens(amountToTake, zone, type, callback)
+  local available = countStackableObjectsByType(zone.getGUID(), type)
+  local tokens = getObjectsByType(zone.getGUID(), type)
+  local took = takeStackableTokens(tokens, amountToTake, callback)
+  if available <= took then
+    zone.clearButtons()
+  end
+  return took, available - took
+end
+
+function catchOctopods(zone, clickerColor)
+  local controlColor = getControlColorInSector(zone, 'octopod', clickerColor)
+  if controlColor then
+    local capacity = labs.getCapacities(controlColor).octopod
+    local caught = takeTokens(capacity, zone, 'octopod', function(octopod) supply.put('octopod', octopod) end)
+    if caught > 0 then
+      scoring.scoreCatchOctopods(clickerColor, caught)
+    end
+  end
+end
+
+function takeCrystals(zone, clickerColor)
+  local controlColor = getControlColorInSector(zone, 'crystal', clickerColor)
+  if controlColor then
+    local existing = players.countCrystals(controlColor)
+    local capacity = labs.getCapacities(controlColor).crystal
+    local amountToTake = capacity - existing
+    if amountToTake <= 0 then
+      broadcastToColor(msg.capacityExhausted:format(msg.supply.crystal), clickerColor, Color.Red)
+    else
+      local crystals = {}
+      local took = takeTokens(amountToTake, zone, 'crystal', function(crystal) table.insert(crystals, crystal) end)
+      Wait.condition(function() players.assignCrystals(controlColor, crystals) end, function() return #crystals == took end)
+    end
+  end
+end
+
+function takeTimeMarkers(zone, clickerColor)
+  local controlColor, sectorIndex = getControlColorInSector(zone, 'time', clickerColor)
+  if controlColor then
+    local existing = players.countTime(controlColor)
+    local capacity = labs.getCapacities(controlColor).time
+    local amountToTake = capacity - existing
+    if amountToTake <= 0 then
+      broadcastToColor(msg.capacityExhausted:format(msg.supply.time), clickerColor, Color.Red)
+    else
+      local times = {}
+      local took, remaining = takeTokens(amountToTake, zone, 'time', function(time) table.insert(times, time) end)
+      Wait.condition(function() players.assignTime(controlColor, times) end, function() return #times == took end)
+      if remaining < 2 then
+        station.placeTime(sectorIndex, 2 - remaining)
+      end
+    end
+  end
+end
+
+local function showTakeButton(sectorIndex, type)
+  local zone = getObjectFromGUID(sectorZones[sectorIndex][type])
+  zone.clearButtons()
+  local fnName = buttonTypeFunctions[type]
+  zone.createButton({
+    click_function = fnName,
+    label          = msg.btn[fnName],
+    position       = {0, -0.51, 1},
+    width          = 500,
+    height         = 200
+  })
+end
+
 local function placeTokensInZone(type, sectorIndex, count)
   local zone = getObjectFromGUID(sectorZones[sectorIndex][type])
   local pos = zone.getPosition()
@@ -107,50 +233,25 @@ local function placeTokensInZone(type, sectorIndex, count)
     supply.take(type, pos, zone.getRotation())
     pos.y = pos.y + 0.5
   end
+  if count > 0 then
+    showTakeButton(sectorIndex, type)
+  end
 end
 
-function catchOctopods(zone, color)
-  local count = countStackableObjectsByType(zone.getGUID(), 'octopod')
-  local capacities = labs.getCapacities(color)
-  local capacity = capacities.octopod
-  local catch = math.min(count, capacity)
-
-  local octopods = getObjectsByType(zone.getGUID(), 'octopod')
-  -- remove all octopods and place new ones is easier then removing only needed ones
-  for _, octopod in ipairs(octopods) do
-    octopod.destruct()
-  end
-
-  if count > catch then
-    local pos = zone.getPosition()
-    pos.y = 1.3
-    for i = 1, count - catch do
-      supply.takeFast('octopod', pos, zone.getRotation())
-      pos.y = pos.y + 0.26
+function station.updateButtons()
+  for sectorIndex = 1, 6 do
+    for type, fnName in pairs(buttonTypeFunctions) do
+      local zone_GUID = sectorZones[sectorIndex][type]
+      local count = countStackableObjectsByType(zone_GUID, type)
+      if count > 0 then
+        showTakeButton(sectorIndex, type, fnName)
+      end
     end
-  else
-    zone.clearButtons()
   end
-  scoring.scoreCatchOctopods(color, catch)
-end
-
-local function showCatchOctopodsButton(sectorIndex)
-  local zone = getObjectFromGUID(sectorZones[sectorIndex].octopod)
-  zone.clearButtons()
-  zone.createButton({
-    click_function = 'catchOctopods',
-    label          = msg.btn.catchOctopods,
-    position       = {0, -0.51, 0.8},
-    width          = 500,
-    height         = 200
-  })
 end
 
 function station.placeOctopods(sectorIndex, count)
   placeTokensInZone('octopod', sectorIndex, count)
-  if count > 0 then
-    showCatchOctopodsButton(sectorIndex)
-  end
 end
 
 function station.placeCrystals(sectorIndex, count)

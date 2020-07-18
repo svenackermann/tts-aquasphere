@@ -116,7 +116,7 @@ local function applyCenterTile(tile)
     local sectorIndex = ((i - 1 + rot) % 6) + 1
     local sectorConfig = tileConfig[i]
     station.removeTime(sectorIndex)
-    station.placeTime(sectorIndex, sectorConfig[1])
+    station.placeTime(sectorIndex, math.max(sectorConfig[1], 2))
     station.placeCrystals(sectorIndex, sectorConfig[2])
     station.placeOctopods(sectorIndex, sectorConfig[3])
     if sectorConfig[4] > 0 then

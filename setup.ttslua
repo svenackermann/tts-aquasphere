@@ -38,22 +38,27 @@ local function setupRemainingSectors(sectorsOrder, sectorIndices, submarines)
   local sectorIndex = sectorsOrder[letters[1]]
   station.placeOctopods(sectorIndex, 2)
   station.placeCrystals(sectorIndex, 1)
+  station.placeTime(sectorIndex, 2)
   placeGreyBot(sectorIndex, size)
 
   sectorIndex = sectorsOrder[letters[2]]
   station.placeOctopods(sectorIndex, 3)
   station.placeCrystals(sectorIndex, 2)
+  station.placeTime(sectorIndex, 2)
   placeGreyBot(sectorIndex, size)
 
   if size > 2 then
     sectorIndex = sectorsOrder[letters[3]]
+    station.placeTime(sectorIndex, 2)
     placeGreyBot(sectorIndex, size)
 
     table.insert(sectorIndices, sectorIndex)
     table.insert(submarines, supply.takeFast('greySubmarine'))
 
     if size > 3 then
-      table.insert(sectorIndices, sectorsOrder[letters[4]])
+      sectorIndex = sectorsOrder[letters[4]]
+      station.placeTime(sectorIndex, 2)
+      table.insert(sectorIndices, sectorIndex)
       table.insert(submarines, supply.takeFast('greySubmarine'))
     end
   end

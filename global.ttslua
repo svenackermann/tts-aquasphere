@@ -42,6 +42,7 @@ function onLoad(save_state)
     local activePlayers = headquarters.getActivePlayers()
     playerCount = #activePlayers
     setup.finished(activePlayers)
+    station.updateButtons()
   end
 end
 

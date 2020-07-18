@@ -129,6 +129,28 @@ function players.countTime(color)
   return countStackableObjectsByType(playerConfigs[color].timeZone_GUID, 'time')
 end
 
+function players.assignCrystals(color, crystals)
+  local zone = getObjectFromGUID(playerConfigs[color].crystalsZone_GUID)
+  local pos = zone.getPosition()
+  pos.y = 3
+  for _, crystal in ipairs(crystals) do
+    crystal.setPositionSmooth(pos)
+    crystal.setRotation(zone.getRotation())
+    pos.y = pos.y + 0.5
+  end
+end
+
+function players.assignTime(color, times)
+  local zone = getObjectFromGUID(playerConfigs[color].timeZone_GUID)
+  local pos = zone.getPosition()
+  pos.y = 3
+  for _, time in ipairs(times) do
+    time.setPositionSmooth(pos)
+    time.setRotation(zone.getRotation())
+    pos.y = pos.y + 0.5
+  end
+end
+
 local function assignTimeWithCapacity(color, amount)
   local capacity = labs.getCapacities(color).time
   local existing = countStackableObjectsByType(playerConfigs[color].timeZone_GUID, 'time')
@@ -178,30 +200,26 @@ end
 
 function players.enableCapacityCheck(color)
   local player = playerConfigs[color]
-  local function enterFn(type)
-    return function(enter_object, zone)
-      local function checkCapacity()
-        local existing = countStackableObjectsByType(zone.getGUID(), type)
-        if existing > 0 then
-          local capacities = labs.getCapacities(color)
-          local capacity = capacities[type]
-          if existing > capacity then
-            broadcastToAll(msg.capacityExceeded:format(messages.getPlayerName(color), msg.supply[type]), Color.fromString(color))
-          end
+  local function enterFn(enter_object, zone)
+    local function checkCapacity()
+      local existing = countStackableObjectsByType(zone.getGUID(), 'research')
+      if existing > 0 then
+        local capacities = labs.getCapacities(color)
+        local capacity = capacities.research
+        if existing > capacity then
+          broadcastToAll(msg.capacityExceeded:format(messages.getPlayerName(color), msg.supply.research), Color.fromString(color))
         end
       end
-      Wait.time(checkCapacity, 0.5)
     end
+    Wait.time(checkCapacity, 0.5)
   end
-  sZones.registerZoneEvents(player.timeZone_GUID, enterFn('time'))
-  sZones.registerZoneEvents(player.crystalsZone_GUID, enterFn('crystal'))
   local handZone = Player[color].getHandTransform()
   spawnObject({
     type              = 'ScriptingTrigger',
     position          = handZone.position,
     rotation          = handZone.rotation,
     scale             = handZone.scale * 1.3,
-    callback_function = function(zone) sZones.registerZoneEvents(zone.getGUID(), enterFn('research')) end,
+    callback_function = function(zone) sZones.registerZoneEvents(zone.getGUID(), enterFn) end,
     sound             = false
   })
 end
