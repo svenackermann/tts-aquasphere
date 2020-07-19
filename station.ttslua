@@ -128,38 +128,10 @@ local function getControlColorInSector(zone, type, clickerColor)
   return nil
 end
 
-local function takeStackableTokens(tokens, amountToTake, callback)
-  local took = 0
-  for _, token in ipairs(tokens) do
-    local quantity = token.getQuantity()
-    if quantity < 0 then
-      -- not a stack
-      took = took + 1
-      callback(token)
-      if took >= amountToTake then
-        return took
-      end
-    else
-      -- token is actually a stack
-      for i = 1, quantity do
-        took = took + 1
-        token.takeObject({
-          callback_function = callback,
-          smooth            = false
-        })
-        if took >= amountToTake then
-          return took
-        end
-      end
-    end
-  end
-  return took
-end
-
 local function takeTokens(amountToTake, zone, type, callback)
-  local available = countStackableObjectsByType(zone.getGUID(), type)
   local tokens = getObjectsByType(zone.getGUID(), type)
-  local took = takeStackableTokens(tokens, amountToTake, callback)
+  local available = stacks.count(tokens)
+  local took = stacks.take(tokens, amountToTake, callback)
   if available <= took then
     zone.clearButtons()
   end
@@ -187,8 +159,11 @@ function takeCrystals(zone, clickerColor)
       broadcastToColor(msg.capacityExhausted:format(msg.supply.crystal), clickerColor, Color.Red)
     else
       local crystals = {}
-      local took = takeTokens(amountToTake, zone, 'crystal', function(crystal) table.insert(crystals, crystal) end)
-      Wait.condition(function() players.assignCrystals(controlColor, crystals) end, function() return #crystals == took end)
+      local took = takeTokens(amountToTake, zone, 'crystal', function(crystal, count) crystals[count] = crystal end)
+      local function assign()
+        players.assignCrystals(controlColor, crystals)
+      end
+      Wait.condition(assign, function() return #crystals == took end, 0.5, assign)
     end
   end
 end
@@ -203,11 +178,14 @@ function takeTimeMarkers(zone, clickerColor)
       broadcastToColor(msg.capacityExhausted:format(msg.supply.time), clickerColor, Color.Red)
     else
       local times = {}
-      local took, remaining = takeTokens(amountToTake, zone, 'time', function(time) table.insert(times, time) end)
-      Wait.condition(function() players.assignTime(controlColor, times) end, function() return #times == took end)
-      if remaining < 2 then
-        station.placeTime(sectorIndex, 2 - remaining)
+      local took, remaining = takeTokens(amountToTake, zone, 'time', function(time, count) times[count] = time end)
+      local function assign()
+        players.assignTime(controlColor, times)
+        if remaining < 2 then
+          station.placeTime(sectorIndex, 2 - remaining)
+        end
       end
+      Wait.condition(assign, function() return #times == took end, 0.5, assign)
     end
   end
 end
@@ -264,9 +242,7 @@ end
 
 function station.removeTime(sectorIndex)
   local times = getObjectsByType(sectorZones[sectorIndex].time, 'time')
-  for _, time in ipairs(times) do
-    time.destruct()
-  end
+  stacks.take(times, 100, function(time) supply.put('time', time) end)
 end
 
 local function findZoneForSubmarine(sectorIndex, submarine, zoneSubs)
