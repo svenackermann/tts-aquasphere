@@ -1,0 +1,82 @@
+extHC = {}
+
+local extBag_GUID = '5ab794'
+local rules_GUID = 'be2ee9'
+local deck_GUID = '097a4d'
+local cardsZone_GUID = '2ebc4e'
+local deckPos = {-11, 1.1, 31}
+local rulePos = {52, 1, -13}
+
+function toggleExtHCEnabled()
+  local bag = getObjectFromGUID(extBag_GUID)
+  local deck = getObjectFromGUID(deck_GUID)
+  if deck then
+    bag.putObject(deck)
+    local rules = getObjectFromGUID(rules_GUID)
+    if rules then
+      bag.putObject(rules)
+    end
+  else
+    bag.takeObject({
+      position = deckPos,
+      rotation = {0, 180, 180},
+      guid     = deck_GUID
+    })
+    bag.takeObject({
+      position = rulePos,
+      rotation = {0, 180, 0},
+      guid     = rules_GUID
+    })
+  end
+end
+
+function extHC.showButton()
+  local bag = getObjectFromGUID(extBag_GUID)
+  bag.clearButtons()
+  bag.createButton({
+    click_function = 'toggleExtHCEnabled',
+    label          = 'H&C Erweiterung',
+    position       = {0, 0.25, 3},
+    height         = 700,
+    width          = 2500,
+    font_size      = 300
+  })
+end
+
+local function dealCards(deck)
+  local cardsZone = getObjectFromGUID(cardsZone_GUID)
+  for i = 1, playerCount + 1 do
+    local pos = cardsZone.getPosition()
+    pos.x = pos.x + (i - 3) * 3.5
+    deck.takeObject({
+      position = pos,
+      rotation = cardsZone.getRotation()
+    })
+  end
+end
+
+function extHC.setup()
+  local bag = getObjectFromGUID(extBag_GUID)
+  bag.clearButtons()
+  local deck = getObjectFromGUID(deck_GUID)
+  if deck then
+    deck.shuffle()
+    dealCards(deck)
+  end
+end
+
+function extHC.nextRound()
+  local deck = getObjectFromGUID(deck_GUID)
+  if deck then
+    local cards = getObjectsByType(cardsZone_GUID, 'extHC')
+    local lastCard
+    for i, card in ipairs(cards) do
+      card.setPositionSmooth({12, 1 + 0.5 * i, 31}, false)
+      card.setRotationSmooth({0, 90, 0}, false)
+      lastCard = card
+    end
+    if lastCard then
+      Wait.condition(function() dealCards(deck) end, function() return not lastCard.isSmoothMoving() end)
+    end
+  end
+end

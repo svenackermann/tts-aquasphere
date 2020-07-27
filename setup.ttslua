@@ -112,6 +112,7 @@ local function setupGame(colors)
   centerTiles.setup()
   turns.setup(colors)
   headquarters.setup(colors)
+  extHC.setup()
   broadcastToAll(msg.startPlayer:format(messages.getPlayerName(colors[1])), Color.fromString(colors[1]))
 
   setup.finished(colors)

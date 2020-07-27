@@ -25,6 +25,7 @@ playerCount = 0
 #include <rounds>
 #include <scoring>
 #include <setup>
+#include <extensionHC>
 
 function onLoad(save_state)
   local language
@@ -39,6 +40,7 @@ function onLoad(save_state)
     i18n.showUI()
     setup.showButtons()
     scoring.hide()
+    extHC.showButton()
   else
     local activePlayers = headquarters.getActivePlayers()
     playerCount = #activePlayers

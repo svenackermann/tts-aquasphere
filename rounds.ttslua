@@ -35,6 +35,7 @@ function nextRound(obj, color)
   centerTiles.nextRound()
   headquarters.nextRound(currentRound >= 3)
   players.nextRound()
+  extHC.nextRound()
 
   obj.editButton({
     index          = 0,
