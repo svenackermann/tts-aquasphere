@@ -137,19 +137,19 @@ end
 
 function setupGameSeatedPlayers(obj, color)
   local seatedPlayers = getSeatedPlayers()
+  local seated = {}
+  for _, seatedPlayer in ipairs(seatedPlayers) do
+    seated[seatedPlayer] = 1
+  end
+  seatedPlayers = {}
+  for _, player in ipairs(playerOrder) do
+    if seated[player] then
+      table.insert(seatedPlayers, player)
+    end
+  end
   if #seatedPlayers < 2 then
     broadcastToColor(msg.atLeast2Players, color, Color.Red)
   else
-    local seated = {}
-    for _, seatedPlayer in ipairs(seatedPlayers) do
-      seated[seatedPlayer] = 1
-    end
-    seatedPlayers = {}
-    for _, player in ipairs(playerOrder) do
-      if seated[player] then
-        table.insert(seatedPlayers, player)
-      end
-    end
     setupGame(seatedPlayers)
   end
 end
