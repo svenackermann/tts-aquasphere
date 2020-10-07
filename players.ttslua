@@ -71,6 +71,9 @@ local stationScientistPos = {
   {-11.59, 1.83, 6.46}
 }
 
+local timeSpot_GUIDs = {'207d3d', '536447', '3ffc65', '7a3e4b'}
+local crystalSpot_GUIDs = {'581e94', 'f9b30a', 'c1a9ea', '9bf53e'}
+
 local function placeInitBotAndScientist(player, letter, sectorIndex)
   local action = boardSectorBotActions[letter]
   local deltaX = (botActionOrder[action] - 1) * 0.31
@@ -224,9 +227,31 @@ function players.enableCapacityCheck(color)
   })
 end
 
+local function updateSpots(guids, label)
+  for _, guid in ipairs(guids) do
+    local spot = getObjectFromGUID(guid)
+    spot.interactable = false
+    spot.clearButtons()
+    spot.createButton({
+      click_function = 'none',
+      label          = label,
+      position       = {0, 0, 0.8},
+      font_color     = Color.White,
+      height         = 0,
+      width          = 0
+    })
+  end
+end
+
+local function updateSpotLabels()
+  updateSpots(timeSpot_GUIDs, msg.supply.time)
+  updateSpots(crystalSpot_GUIDs, msg.supply.crystal)
+end
+
 local function languageChanged(lang)
   for _, player in pairs(playerConfigs) do
     getObjectFromGUID(player.scientist_GUID).setName(msg.scientist)
   end
+  updateSpotLabels()
 end
 i18n.registerForLanguageChange(languageChanged)
