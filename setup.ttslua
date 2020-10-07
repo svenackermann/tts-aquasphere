@@ -2,6 +2,8 @@ setup = {}
 
 local setup3PlayersCard_GUID = 'a8734f'
 
+local playerOrder = {'White', 'Blue', 'Yellow', 'Red'}
+
 local function shufflePlayers(colors)
   local startPlayer = math.random(1, #colors)
   if startPlayer == 1 then
@@ -119,15 +121,18 @@ local function setupGame(colors)
 end
 
 function setupGame2Players()
-  setupGame({'White', 'Blue'})
+  table.remove(playerOrder)
+  table.remove(playerOrder)
+  setupGame(playerOrder)
 end
 
 function setupGame3Players()
-  setupGame({'White', 'Blue', 'Yellow'})
+  table.remove(playerOrder)
+  setupGame(playerOrder)
 end
 
 function setupGame4Players()
-  setupGame({'White', 'Blue', 'Yellow', 'Red'})
+  setupGame(playerOrder)
 end
 
 function setupGameSeatedPlayers(obj, color)
@@ -135,6 +140,16 @@ function setupGameSeatedPlayers(obj, color)
   if #seatedPlayers < 2 then
     broadcastToColor(msg.atLeast2Players, color, Color.Red)
   else
+    local seated = {}
+    for _, seatedPlayer in ipairs(seatedPlayers) do
+      seated[seatedPlayer] = 1
+    end
+    seatedPlayers = {}
+    for _, player in ipairs(playerOrder) do
+      if seated[player] then
+        table.insert(seatedPlayers, player)
+      end
+    end
     setupGame(seatedPlayers)
   end
 end
